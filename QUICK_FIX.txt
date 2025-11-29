@@ -1,0 +1,19 @@
+========================================
+БЫСТРОЕ ИСПРАВЛЕНИЕ И ЗАГРУЗКА В GITHUB
+========================================
+
+ВАРИАНТ 1: Запустите файл fix_and_upload.bat двойным кликом
+
+ВАРИАНТ 2: Выполните команды в PowerShell:
+
+cd "E:\Project_career coach\career-couch1\financial_coach"
+
+git checkout --orphan new-branch
+git add .
+git commit -m "Initial commit: Financial Career Coach (without large files)"
+git branch -D diploma-version
+git branch -M diploma-version
+git push -f origin diploma-version
+
+========================================
+

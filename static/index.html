@@ -1,0 +1,1924 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Финансовый Карьерный Коуч</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'SF Pro Display', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #0f2027 0%, #1e3c72 25%, #2a5298 50%, #1e3c72 75%, #0f2027 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 20s ease infinite;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .app-wrapper {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            gap: 20px;
+            height: calc(100vh - 40px);
+            align-items: stretch;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .sidebar {
+            width: 300px;
+            background: linear-gradient(145deg, #ffffff 0%, #fafbfc 100%);
+            border-radius: 28px;
+            box-shadow: 
+                0 32px 96px rgba(0, 0, 0, 0.24),
+                0 8px 32px rgba(30, 60, 114, 0.12),
+                0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+            backdrop-filter: blur(20px);
+            border: 1.5px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-header h2 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .new-chat-button {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .new-chat-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .sessions-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+
+        .session-item {
+            padding: 12px;
+            margin-bottom: 8px;
+            background: white;
+            border: 2px solid #e8ecf0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .session-item:hover {
+            border-color: #1e3c72;
+            box-shadow: 0 4px 12px rgba(30, 60, 114, 0.15);
+        }
+
+        .session-item.active {
+            border-color: #1e3c72;
+            background: linear-gradient(135deg, #f0f4ff 0%, #e8ecf0 100%);
+        }
+
+        .session-item-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .session-item-delete {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            padding: 4px 6px;
+            background: rgba(255, 77, 77, 0.08);
+            border: none;
+            border-radius: 6px;
+            color: #ff4d4d;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+            opacity: 0.6;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            z-index: 10;
+        }
+
+        .session-item-delete:hover {
+            background: rgba(255, 77, 77, 0.15);
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .session-item.active .session-item-delete {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+        }
+
+        .session-item.active .session-item-delete:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .session-item-title {
+            font-weight: 600;
+            color: #1e3c72;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+
+        .session-item-preview {
+            font-size: 12px;
+            color: #666;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .session-item-date {
+            font-size: 11px;
+            color: #999;
+            margin-top: 6px;
+        }
+
+        .container {
+            background: linear-gradient(145deg, #ffffff 0%, #fafbfc 100%);
+            border-radius: 28px;
+            box-shadow: 
+                0 32px 96px rgba(0, 0, 0, 0.24),
+                0 8px 32px rgba(30, 60, 114, 0.12),
+                0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+            flex: 1;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+            margin: 0 auto;
+            backdrop-filter: blur(20px);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0f2027 0%, #1e3c72 25%, #2a5298 50%, #1e3c72 75%, #0f2027 100%);
+            background-size: 300% 300%;
+            animation: gradientShift 12s ease infinite;
+            color: white;
+            padding: 32px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+            backdrop-filter: blur(20px);
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+        }
+
+        .header-icon {
+            font-size: 24px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.96;
+            font-weight: 400;
+            letter-spacing: 0.2px;
+            line-height: 1.6;
+        }
+
+        .header-badge {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 4px 12px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+        }
+
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            background: linear-gradient(to bottom, #f8f9fa 0%, #ffffff 100%);
+            position: relative;
+        }
+
+        .chat-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .chat-container::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            border-radius: 10px;
+        }
+
+        .chat-container::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message.assistant {
+            justify-content: flex-start;
+        }
+
+        .message-bubble {
+            max-width: 85%;
+            padding: 16px 22px;
+            border-radius: 20px;
+            word-wrap: break-word;
+            line-height: 1.65;
+            font-size: 15px;
+            letter-spacing: 0.01em;
+        }
+
+        .message.user .message-bubble {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            border-bottom-right-radius: 6px;
+            box-shadow: 
+                0 4px 16px rgba(30, 60, 114, 0.25),
+                0 2px 8px rgba(30, 60, 114, 0.15);
+        }
+
+        .message.assistant .message-bubble {
+            background: white;
+            color: #1a1a1a;
+            border-bottom-left-radius: 6px;
+            box-shadow: 
+                0 2px 12px rgba(0, 0, 0, 0.08),
+                0 1px 4px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Для HTML контента убираем фон, так как карточки уже имеют свой фон */
+        .message.assistant .message-bubble.html-content {
+            background: transparent;
+            box-shadow: none;
+            padding: 0;
+        }
+
+        .input-container {
+            padding: 24px;
+            background: linear-gradient(to top, #ffffff 0%, #f8f9fa 100%);
+            border-top: 2px solid #e8ecf0;
+            display: flex;
+            gap: 12px;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .input-container input {
+            flex: 1;
+            padding: 16px 24px;
+            border: 2px solid #e1e8ed;
+            border-radius: 24px;
+            font-size: 15px;
+            outline: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            letter-spacing: 0.01em;
+        }
+
+        .input-container input:focus {
+            border-color: #1e3c72;
+            box-shadow: 
+                0 4px 16px rgba(30, 60, 114, 0.12),
+                0 0 0 3px rgba(30, 60, 114, 0.08);
+            transform: translateY(-2px);
+        }
+
+        .input-container button {
+            padding: 16px 36px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            border: none;
+            border-radius: 24px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 
+                0 4px 16px rgba(30, 60, 114, 0.25),
+                0 2px 8px rgba(30, 60, 114, 0.15);
+            letter-spacing: 0.02em;
+        }
+
+        .input-container button:hover {
+            transform: translateY(-3px);
+            box-shadow: 
+                0 8px 24px rgba(30, 60, 114, 0.35),
+                0 4px 12px rgba(30, 60, 114, 0.2);
+            background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+        }
+
+        .input-container button:active {
+            transform: translateY(0);
+        }
+
+        .input-container button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            border-bottom: 2px solid #fdcb6e;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 500;
+            color: #856404;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .status.success {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            border-bottom-color: #28a745;
+            color: #155724;
+        }
+
+        .status.error {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            border-bottom-color: #dc3545;
+            color: #721c24;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(102, 126, 234, 0.3);
+            border-radius: 50%;
+            border-top-color: #667eea;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .actions {
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .actions {
+            background: linear-gradient(to top, #f8f9fa 0%, #ffffff 100%);
+            border-top: 2px solid #e8ecf0;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding: 15px 20px;
+        }
+
+        .actions button {
+            padding: 10px 20px;
+            background: white;
+            border: 2px solid #1e3c72;
+            color: #1e3c72;
+            border-radius: 22px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        }
+
+        .actions button:hover {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(30, 60, 114, 0.3);
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .export-buttons button {
+            flex: 1;
+            padding: 8px 12px;
+            background: white;
+            border: 1px solid #1e3c72;
+            color: #1e3c72;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .export-buttons button:hover {
+            background: #1e3c72;
+            color: white;
+        }
+
+        .welcome-message {
+            text-align: center;
+            padding: 56px 40px;
+            color: #4a5568;
+            background: linear-gradient(145deg, #ffffff 0%, #fafbfc 100%);
+            border-radius: 24px;
+            border: 1.5px solid #e1e8ed;
+            box-shadow: 
+                0 8px 24px rgba(0, 0, 0, 0.06),
+                0 2px 8px rgba(30, 60, 114, 0.04);
+        }
+
+        .welcome-message h2 {
+            color: #1a1a1a;
+            margin-bottom: 18px;
+            font-size: 30px;
+            font-weight: 800;
+            letter-spacing: -0.8px;
+        }
+
+        .welcome-message p {
+            font-size: 16px;
+            line-height: 1.75;
+            margin-bottom: 10px;
+            color: #4a5568;
+            letter-spacing: 0.01em;
+        }
+
+        .welcome-icon {
+            font-size: 72px;
+            margin-bottom: 24px;
+            filter: drop-shadow(0 6px 16px rgba(30, 60, 114, 0.25));
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+
+        /* Стили для карточек вакансий */
+        .vacancies-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .vacancy-card {
+            background: linear-gradient(145deg, #ffffff 0%, #fafbfc 100%);
+            border: 1.5px solid #e1e8ed;
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: 
+                0 2px 8px rgba(0, 0, 0, 0.04),
+                0 8px 24px rgba(30, 60, 114, 0.06),
+                0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .vacancy-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #1e3c72 0%, #2a5298 100%);
+            transform: scaleX(0);
+            transition: transform 0.3s;
+        }
+
+        .vacancy-card:hover {
+            border-color: #1e3c72;
+            box-shadow: 
+                0 12px 32px rgba(30, 60, 114, 0.12),
+                0 4px 16px rgba(30, 60, 114, 0.08),
+                0 0 0 1px rgba(30, 60, 114, 0.08) inset;
+            transform: translateY(-6px);
+        }
+
+        .vacancy-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .vacancy-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 1;
+            font-weight: 700;
+            margin-right: 14px;
+            font-size: 15px;
+            box-shadow: 0 4px 12px rgba(30, 60, 114, 0.3);
+            flex-shrink: 0;
+        }
+
+        .vacancy-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            letter-spacing: -0.3px;
+            line-height: 1.3;
+        }
+
+        .vacancy-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .vacancy-detail {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .vacancy-detail-icon {
+            font-size: 16px;
+        }
+
+        .vacancy-description {
+            color: #555;
+            font-size: 14px;
+            line-height: 1.7;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #f0f0f0;
+            position: relative;
+        }
+
+        .description-preview {
+            max-height: 80px;
+            overflow: hidden;
+            position: relative;
+            transition: max-height 0.3s ease;
+        }
+
+        .description-preview.expanded {
+            max-height: none;
+        }
+
+        .description-toggle {
+            margin-top: 8px;
+            padding: 6px 12px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            color: #1e3c72;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .description-toggle:hover {
+            background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+            border-color: #1e3c72;
+            transform: translateY(-1px);
+        }
+
+        .vacancy-skills {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .vacancy-skills-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .skill-tag {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            color: #1e3c72;
+            padding: 6px 12px;
+            border-radius: 14px;
+            font-size: 12px;
+            font-weight: 500;
+            border: 1px solid #dee2e6;
+            transition: all 0.2s;
+        }
+
+        .skill-tag:hover {
+            background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+            transform: translateY(-1px);
+        }
+
+        /* Стили для профиля */
+        .profile-container {
+            background: linear-gradient(145deg, #ffffff 0%, #fafbfc 100%);
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: 
+                0 4px 20px rgba(0, 0, 0, 0.06),
+                0 12px 40px rgba(30, 60, 114, 0.08),
+                0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+            margin-top: 10px;
+            border: 1.5px solid #e1e8ed;
+            backdrop-filter: blur(10px);
+        }
+
+        .profile-section {
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .profile-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .profile-section-title {
+            font-size: 19px;
+            font-weight: 800;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 14px;
+            border-bottom: 2px solid #e1e8ed;
+            letter-spacing: -0.4px;
+            text-transform: none;
+        }
+
+        .profile-section-content {
+            color: #4a5568;
+            line-height: 1.75;
+            font-size: 15px;
+            letter-spacing: 0.01em;
+        }
+
+        .profile-item {
+            margin-bottom: 14px;
+            padding: 16px;
+            background: linear-gradient(145deg, #fafbfc 0%, #ffffff 100%);
+            border-radius: 12px;
+            border: 1px solid #e1e8ed;
+            transition: all 0.25s;
+        }
+
+        .profile-item:hover {
+            background: linear-gradient(145deg, #ffffff 0%, #fafbfc 100%);
+            border-color: #1e3c72;
+            box-shadow: 0 2px 8px rgba(30, 60, 114, 0.08);
+        }
+
+        .profile-item-title {
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+            font-size: 15px;
+            letter-spacing: -0.2px;
+        }
+
+        .profile-item-details {
+            color: #4a5568;
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        .profile-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .profile-tag {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 7px 14px;
+            border-radius: 18px;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: 0 2px 6px rgba(30, 60, 114, 0.2);
+            transition: transform 0.2s;
+        }
+
+        .profile-tag:hover {
+            transform: translateY(-1px);
+        }
+
+        .profile-empty {
+            color: #999;
+            font-style: italic;
+        }
+
+        /* Footer с информацией об авторе */
+        .footer {
+            padding: 16px 24px;
+            background: linear-gradient(to top, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            text-align: center;
+            font-size: 13px;
+            border-top: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .footer-text {
+            opacity: 0.9;
+        }
+
+        .footer-author {
+            font-weight: 600;
+            opacity: 1;
+        }
+
+        .footer-icon {
+            font-size: 14px;
+        }
+        .sessions-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sessions-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .sessions-list::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-wrapper">
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>💹 Мои чаты</h2>
+                <button class="new-chat-button" onclick="createNewSession()">
+                    <span>➕</span>
+                    <span>Новый чат</span>
+                </button>
+            </div>
+            <div class="sessions-list" id="sessionsList">
+                <!-- Список сессий будет здесь -->
+            </div>
+        </div>
+
+        <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <h1>
+                    <span class="header-icon">💹</span>
+                    Финансовый Карьерный Коуч
+                </h1>
+                <p>Профессиональная AI-система для развития карьеры в финансовом и банковском секторе</p>
+                <div class="header-badge">Премиум сервис карьерного консультирования</div>
+            </div>
+        </div>
+        
+        <div id="status" class="status" style="display: none;"></div>
+        
+        <div class="chat-container" id="chatContainer">
+            <div class="welcome-message">
+                <div class="welcome-icon">💹</div>
+                <h2>Добро пожаловать!</h2>
+                <p>Я ваш персональный карьерный консультант для финансового сектора</p>
+                <p>Помогу найти подходящие вакансии и построить карьерную траекторию</p>
+                <p style="margin-top: 20px; font-weight: 600; color: #1e3c72;">Начните с того, что расскажите о себе</p>
+            </div>
+        </div>
+
+        <div class="actions" id="actions" style="display: none;">
+            <button onclick="getProfile()">📋 Получить профиль</button>
+            <button onclick="findVacancies()">🔍 Найти вакансии</button>
+            <button onclick="showCareerDevelopment()">🚀 Развитие карьеры</button>
+            <div class="export-buttons">
+                <button onclick="exportHistory('pdf')">📄 Скачать PDF</button>
+                <button onclick="exportHistory('docx')">📝 Скачать Word</button>
+            </div>
+        </div>
+
+        <!-- Модальное окно для развития карьеры -->
+        <div id="careerDevelopmentModal" onclick="if(event.target === this) closeCareerDevelopmentModal()" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); z-index: 1000; align-items: center; justify-content: center;">
+            <div onclick="event.stopPropagation()" style="background: white; border-radius: 20px; padding: 30px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); position: relative;">
+                <button onclick="closeCareerDevelopmentModal()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer; color: #666; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.3s;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='none'">×</button>
+                <h2 style="margin-bottom: 20px; color: #1e3c72; font-size: 24px;">🚀 Развитие карьеры</h2>
+                <p style="margin-bottom: 20px; color: #666;">Укажите желаемую позицию, к которой вы хотите развиваться</p>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">Желаемая позиция *</label>
+                    <input type="text" id="targetPositionInput" placeholder="Например: Финансовый директор" style="width: 100%; padding: 12px; border: 2px solid #e8ecf0; border-radius: 12px; font-size: 16px; outline: none; transition: border-color 0.3s;" onkeypress="if(event.key === 'Enter') getCareerDevelopment()" onfocus="this.style.borderColor='#1e3c72'" onblur="this.style.borderColor='#e8ecf0'">
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">Целевая сфера (опционально)</label>
+                    <input type="text" id="targetFieldInput" placeholder="Например: Инвестиции, Банки" style="width: 100%; padding: 12px; border: 2px solid #e8ecf0; border-radius: 12px; font-size: 16px; outline: none; transition: border-color 0.3s;" onfocus="this.style.borderColor='#1e3c72'" onblur="this.style.borderColor='#e8ecf0'">
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">Специализация (опционально)</label>
+                    <input type="text" id="targetSpecializationInput" placeholder="Например: Риск-менеджмент, M&A" style="width: 100%; padding: 12px; border: 2px solid #e8ecf0; border-radius: 12px; font-size: 16px; outline: none; transition: border-color 0.3s;" onfocus="this.style.borderColor='#1e3c72'" onblur="this.style.borderColor='#e8ecf0'">
+                </div>
+                
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button onclick="closeCareerDevelopmentModal()" style="padding: 12px 24px; background: #e8ecf0; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; transition: all 0.3s;" onmouseover="this.style.background='#d0d7de'" onmouseout="this.style.background='#e8ecf0'">Отмена</button>
+                    <button onclick="getCareerDevelopment()" style="padding: 12px 24px; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; transition: all 0.3s; box-shadow: 0 2px 8px rgba(30, 60, 114, 0.3);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(30, 60, 114, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(30, 60, 114, 0.3)'">Получить план развития</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-container">
+            <input 
+                type="text" 
+                id="messageInput" 
+                placeholder="Напишите сообщение..."
+                onkeypress="if(event.key === 'Enter') sendMessage()"
+            >
+            <button id="sendButton" onclick="sendMessage()">Отправить</button>
+        </div>
+
+        <div class="footer">
+            <div class="footer-content">
+                <span class="footer-text">Made with</span>
+                <span class="footer-icon">💹</span>
+                <span class="footer-text">by</span>
+                <span class="footer-author">Антон Орлов</span>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+        let sessionId = null;
+        let userId = null;
+        let interviewDone = false;
+
+        // Получаем или создаем user_id
+        function getUserId() {
+            if (!userId) {
+                userId = localStorage.getItem('career_user_id');
+                if (!userId) {
+                    userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                    localStorage.setItem('career_user_id', userId);
+                }
+            }
+            return userId;
+        }
+
+        // Загружаем сохраненную сессию при загрузке страницы
+        window.addEventListener('load', async () => {
+            getUserId();
+            await loadSessionsList();
+            const savedSessionId = localStorage.getItem('career_session_id');
+            if (savedSessionId) {
+                await loadSession(savedSessionId);
+            } else {
+                await createSession();
+            }
+        });
+
+        async function createSession() {
+            try {
+                // Убрано showStatus для предотвращения дергания экрана
+                const response = await fetch(`${API_BASE}/sessions`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: getUserId()
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Не удалось создать сессию');
+                }
+
+                const data = await response.json();
+                sessionId = data.session_id;
+                localStorage.setItem('career_session_id', sessionId);
+                // Убрано showStatus для предотвращения дергания экрана
+                
+                // Обновляем список сессий
+                await loadSessionsList();
+                
+                // Автоматически отправляем первое сообщение, чтобы AI начал диалог
+                setTimeout(async () => {
+                    await sendFirstMessage();
+                }, 500);
+            } catch (error) {
+                showStatus('Ошибка: ' + error.message, 'error');
+                console.error('Error creating session:', error);
+            }
+        }
+
+        async function createNewSession() {
+            // Очищаем текущий чат
+            const chatContainer = document.getElementById('chatContainer');
+            chatContainer.innerHTML = '<div class="welcome-message"><div class="welcome-icon">💹</div><h2>Добро пожаловать!</h2><p>Я ваш персональный карьерный консультант для финансового сектора</p><p>Помогу найти подходящие вакансии и построить карьерную траекторию</p><p style="margin-top: 20px; font-weight: 600; color: #1e3c72;">Начните с того, что расскажите о себе</p></div>';
+            document.getElementById('actions').style.display = 'none';
+            interviewDone = false;
+            
+            await createSession();
+        }
+
+        async function loadSessionsList() {
+            try {
+                const response = await fetch(`${API_BASE}/sessions?user_id=${getUserId()}`);
+                if (!response.ok) {
+                    console.error('Failed to load sessions list');
+                    return;
+                }
+                
+                const data = await response.json();
+                const sessionsList = document.getElementById('sessionsList');
+                sessionsList.innerHTML = '';
+                
+                data.sessions.forEach(session => {
+                    const sessionItem = document.createElement('div');
+                    sessionItem.className = 'session-item';
+                    if (session.session_id === sessionId) {
+                        sessionItem.classList.add('active');
+                    }
+                    
+                    const date = new Date(session.last_updated_at);
+                    const dateStr = date.toLocaleDateString('ru-RU', { 
+                        day: '2-digit', 
+                        month: '2-digit', 
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    
+                    sessionItem.innerHTML = `
+                        <div class="session-item-content">
+                            <div class="session-item-title">Чат ${dateStr}</div>
+                            <div class="session-item-preview">${session.preview || 'Новый чат'}</div>
+                            <div class="session-item-date">${dateStr}</div>
+                        </div>
+                        <button class="session-item-delete" onclick="event.stopPropagation(); deleteSession('${session.session_id}')" title="Удалить чат">🗑️</button>
+                    `;
+                    
+                    sessionItem.onclick = () => loadSession(session.session_id);
+                    sessionsList.appendChild(sessionItem);
+                });
+            } catch (error) {
+                console.error('Error loading sessions list:', error);
+            }
+        }
+
+        async function loadSession(sessionIdToLoad) {
+            try {
+                // Убираем сообщение "Загрузка сессии..." чтобы не было дергания
+                const response = await fetch(`${API_BASE}/sessions/${sessionIdToLoad}`);
+                
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        localStorage.removeItem('career_session_id');
+                        createSession();
+                        return;
+                    }
+                    throw new Error('Не удалось загрузить сессию');
+                }
+
+                const data = await response.json();
+                sessionId = sessionIdToLoad;
+                localStorage.setItem('career_session_id', sessionId);
+                
+                // Загружаем сообщения
+                const chatContainer = document.getElementById('chatContainer');
+                chatContainer.innerHTML = '';
+                interviewDone = false;
+                document.getElementById('actions').style.display = 'none';
+                
+                // Загружаем все сообщения из истории
+                if (data.messages && data.messages.length > 0) {
+                    data.messages.forEach((msg, index) => {
+                        // Для последнего сообщения включаем автопрокрутку
+                        const isLast = index === data.messages.length - 1;
+                        addMessage(msg.role, msg.content, isLast, msg.role === 'assistant' && (msg.content.includes('<div') || msg.content.includes('<span')));
+                        if (msg.role === 'assistant' && msg.done) {
+                            interviewDone = true;
+                            document.getElementById('actions').style.display = 'flex';
+                        }
+                    });
+                    
+                    // Прокручиваем вниз после загрузки всех сообщений
+                    setTimeout(() => {
+                        chatContainer.scrollTop = chatContainer.scrollHeight;
+                    }, 100);
+                }
+                
+                // Убираем showStatus чтобы не было дергания
+                await loadSessionsList();
+            } catch (error) {
+                showStatus('Ошибка загрузки: ' + error.message, 'error');
+                console.error('Error loading session:', error);
+                await createSession();
+            }
+        }
+
+        async function sendFirstMessage() {
+            // Отправляем первое сообщение для начала диалога
+            // AI сам скажет приветствие с информацией о количестве вопросов согласно промпту
+            await sendMessageInternal("Привет", false); // false = не показываем сообщение пользователя
+        }
+
+        let isSending = false;
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message || !sessionId || isSending) return;
+            
+            input.value = '';
+            await sendMessageInternal(message, true); // true = показываем сообщение пользователя
+        }
+
+        async function sendMessageInternal(message, showUserMessage = true) {
+            if (!sessionId || isSending) return;
+
+            // Добавляем сообщение пользователя (если нужно)
+            if (showUserMessage) {
+                addMessage('user', message);
+            }
+            
+            // Блокируем кнопку отправки
+            const sendButton = document.getElementById('sendButton');
+            sendButton.disabled = true;
+            sendButton.innerHTML = '<div class="loading"></div>';
+            isSending = true;
+
+            try {
+                const response = await fetch(`${API_BASE}/chat/${sessionId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: message })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Не удалось отправить сообщение');
+                }
+
+                const data = await response.json();
+                
+                // Определяем, является ли ответ HTML (содержит теги)
+                const isHTMLResponse = data.reply && (data.reply.includes('<div') || data.reply.includes('<span') || data.reply.includes('<h'));
+                addMessage('assistant', data.reply, true, isHTMLResponse);
+                
+                // Если интервью завершено, показываем кнопки действий
+                if (data.done && !interviewDone) {
+                    interviewDone = true;
+                    document.getElementById('actions').style.display = 'flex';
+                    showStatus('Интервью завершено! Теперь вы можете получить профиль и найти вакансии.', 'success');
+                }
+                
+                // Обновляем список сессий после отправки сообщения (не блокируем UI)
+                setTimeout(() => {
+                    loadSessionsList().catch(err => console.error('Failed to refresh sessions:', err));
+                }, 0);
+                
+                // Прокручиваем вниз после ответа ИИ
+                setTimeout(() => {
+                    const chatContainer = document.getElementById('chatContainer');
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                }, 100);
+            } catch (error) {
+                showStatus('Ошибка: ' + error.message, 'error');
+                console.error('Error sending message:', error);
+            } finally {
+                sendButton.disabled = false;
+                sendButton.innerHTML = 'Отправить';
+                isSending = false;
+            }
+        }
+
+        function addMessage(role, content, scroll = true, isHTML = false) {
+            const chatContainer = document.getElementById('chatContainer');
+            
+            // Убираем welcome message если есть
+            const welcomeMsg = chatContainer.querySelector('.welcome-message');
+            if (welcomeMsg) {
+                welcomeMsg.remove();
+            }
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'message-bubble';
+            
+            if (isHTML) {
+                bubble.className += ' html-content';
+                bubble.innerHTML = content;
+            } else {
+                bubble.textContent = content;
+            }
+            
+            messageDiv.appendChild(bubble);
+            chatContainer.appendChild(messageDiv);
+            
+            // Всегда прокручиваем вниз при добавлении нового сообщения
+            setTimeout(() => {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }, 50);
+        }
+
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+            statusDiv.style.display = 'block';
+            
+            if (type === 'success' || type === 'error') {
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        async function getProfile() {
+            if (!sessionId) {
+                showStatus('Сначала создайте сессию', 'error');
+                return;
+            }
+
+            try {
+                showStatus('Построение профиля...', 'info');
+                const response = await fetch(`${API_BASE}/profile/${sessionId}`);
+                
+                if (!response.ok) {
+                    if (response.status === 400) {
+                        const error = await response.json();
+                        showStatus(error.detail || 'Интервью еще не завершено. Продолжите общение.', 'error');
+                        return;
+                    }
+                    throw new Error('Не удалось получить профиль');
+                }
+
+                const data = await response.json();
+                const profile = data.profile;
+                
+                // Форматируем профиль в красивый HTML
+                let profileHTML = '<div class="profile-container">';
+                
+                // Профессиональный контекст
+                if (profile.professional_context) {
+                    profileHTML += '<div class="profile-section">';
+                    profileHTML += '<div class="profile-section-title">💹 Профессиональный контекст</div>';
+                    profileHTML += '<div class="profile-section-content">';
+                    
+                    if (profile.professional_context.professional_role) {
+                        profileHTML += `<div class="profile-item"><div class="profile-item-title">Роль:</div><div class="profile-item-details">${profile.professional_context.professional_role}</div></div>`;
+                    }
+                    if (profile.professional_context.professional_field) {
+                        profileHTML += `<div class="profile-item"><div class="profile-item-title">Сфера:</div><div class="profile-item-details">${profile.professional_context.professional_field}</div></div>`;
+                    }
+                    if (profile.professional_context.specialization) {
+                        profileHTML += `<div class="profile-item"><div class="profile-item-title">Специализация:</div><div class="profile-item-details">${profile.professional_context.specialization}</div></div>`;
+                    }
+                    if (profile.professional_context.seniority_level) {
+                        profileHTML += `<div class="profile-item"><div class="profile-item-title">Уровень:</div><div class="profile-item-details">${profile.professional_context.seniority_level}</div></div>`;
+                    }
+                    
+                    profileHTML += '</div></div>';
+                }
+                
+                // Опыт работы
+                if (profile.resume && profile.resume.length > 0) {
+                    profileHTML += '<div class="profile-section">';
+                    profileHTML += '<div class="profile-section-title">📝 Опыт работы</div>';
+                    profileHTML += '<div class="profile-section-content">';
+                    
+                    profile.resume.forEach((item, idx) => {
+                        profileHTML += `<div class="profile-item">`;
+                        profileHTML += `<div class="profile-item-title">${idx + 1}. ${item.title || 'Не указано'} ${item.company ? 'в ' + item.company : ''}</div>`;
+                        profileHTML += '<div class="profile-item-details">';
+                        
+                        if (item.start_date || item.end_date) {
+                            const dates = [item.start_date, item.end_date || 'по настоящее время'].filter(Boolean).join(' - ');
+                            profileHTML += `📅 ${dates}<br>`;
+                        }
+                        
+                        if (item.tasks && item.tasks.length > 0) {
+                            profileHTML += `<strong>Задачи:</strong> ${item.tasks.slice(0, 3).join(', ')}${item.tasks.length > 3 ? '...' : ''}<br>`;
+                        }
+                        
+                        if (item.tech_stack && item.tech_stack.length > 0) {
+                            profileHTML += `<div class="profile-tags">`;
+                            item.tech_stack.slice(0, 5).forEach(tool => {
+                                profileHTML += `<span class="profile-tag">${tool}</span>`;
+                            });
+                            profileHTML += `</div>`;
+                        }
+                        
+                        profileHTML += '</div></div>';
+                    });
+                    
+                    profileHTML += '</div></div>';
+                }
+                
+                // Навыки
+                if (profile.skills) {
+                    profileHTML += '<div class="profile-section">';
+                    profileHTML += '<div class="profile-section-title">🛠️ Навыки и компетенции</div>';
+                    profileHTML += '<div class="profile-section-content">';
+                    
+                    if (profile.skills.hard_skills && profile.skills.hard_skills.length > 0) {
+                        profileHTML += '<div class="profile-item"><div class="profile-item-title">Финансовые навыки:</div>';
+                        profileHTML += '<div class="profile-tags">';
+                        profile.skills.hard_skills.forEach(skill => {
+                            profileHTML += `<span class="profile-tag">${skill}</span>`;
+                        });
+                        profileHTML += '</div></div>';
+                    }
+                    
+                    if (profile.skills.tools && profile.skills.tools.length > 0) {
+                        profileHTML += '<div class="profile-item"><div class="profile-item-title">Инструменты:</div>';
+                        profileHTML += '<div class="profile-tags">';
+                        profile.skills.tools.forEach(tool => {
+                            profileHTML += `<span class="profile-tag">${tool}</span>`;
+                        });
+                        profileHTML += '</div></div>';
+                    }
+                    
+                    if (profile.skills.certifications && profile.skills.certifications.length > 0) {
+                        profileHTML += '<div class="profile-item"><div class="profile-item-title">Сертификаты:</div>';
+                        profileHTML += '<div class="profile-tags">';
+                        profile.skills.certifications.forEach(cert => {
+                            profileHTML += `<span class="profile-tag">${cert}</span>`;
+                        });
+                        profileHTML += '</div></div>';
+                    }
+                    
+                    profileHTML += '</div></div>';
+                }
+                
+                // Цели
+                if (profile.goals) {
+                    profileHTML += '<div class="profile-section">';
+                    profileHTML += '<div class="profile-section-title">🎯 Карьерные цели</div>';
+                    profileHTML += '<div class="profile-section-content">';
+                    
+                    if (profile.goals.desired_role) {
+                        profileHTML += `<div class="profile-item"><div class="profile-item-title">Желаемая роль:</div><div class="profile-item-details">${profile.goals.desired_role}</div></div>`;
+                    }
+                    if (profile.goals.target_field) {
+                        profileHTML += `<div class="profile-item"><div class="profile-item-title">Целевая область:</div><div class="profile-item-details">${profile.goals.target_field}</div></div>`;
+                    }
+                    if (profile.goals.target_specialization) {
+                        profileHTML += `<div class="profile-item"><div class="profile-item-title">Специализация:</div><div class="profile-item-details">${profile.goals.target_specialization}</div></div>`;
+                    }
+                    
+                    profileHTML += '</div></div>';
+                }
+                
+                profileHTML += '</div>';
+
+                addMessage('assistant', profileHTML, true, true);
+                showStatus('Профиль получен!', 'success');
+            } catch (error) {
+                showStatus('Ошибка: ' + error.message, 'error');
+                console.error('Error getting profile:', error);
+            }
+        }
+
+        async function findVacancies() {
+            if (!sessionId) {
+                showStatus('Сначала создайте сессию', 'error');
+                return;
+            }
+
+            try {
+                showStatus('Поиск вакансий...', 'info');
+                const response = await fetch(`${API_BASE}/match/vacancies/by-session/${sessionId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        k_faiss: 100,
+                        k_stage1: 30,
+                        k_stage2: 15
+                    })
+                });
+
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        showStatus('Профиль не найден. Сначала получите профиль.', 'error');
+                        return;
+                    }
+                    if (response.status === 422) {
+                        const errorData = await response.json().catch(() => ({}));
+                        showStatus('Ошибка валидации: ' + (errorData.detail || 'Проверьте параметры запроса'), 'error');
+                        console.error('Validation error:', errorData);
+                        return;
+                    }
+                    const errorText = await response.text();
+                    showStatus('Ошибка: ' + errorText, 'error');
+                    console.error('Error response:', errorText);
+                    return;
+                }
+
+                const data = await response.json();
+                
+                if (data.result.length === 0) {
+                    addMessage('assistant', 'К сожалению, подходящих вакансий не найдено. Попробуйте изменить параметры поиска.');
+                    showStatus('Вакансии не найдены', 'info');
+                    return;
+                }
+
+                // Форматируем вакансии в красивые карточки
+                const vacanciesHeaderId = `vacancies-header-${Date.now()}`;
+                let vacanciesHTML = `<div id="${vacanciesHeaderId}" style="margin-bottom: 20px; padding: 20px; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; border-radius: 16px; text-align: center; box-shadow: 0 6px 20px rgba(30, 60, 114, 0.3);">`;
+                vacanciesHTML += `<div style="font-size: 22px; font-weight: 700; margin-bottom: 6px; letter-spacing: -0.3px;">🔍 Найдено ${data.result.length} подходящих вакансий</div>`;
+                vacanciesHTML += `<div style="font-size: 14px; opacity: 0.95; font-weight: 400;">В финансовом и банковском секторе</div>`;
+                vacanciesHTML += `</div>`;
+                vacanciesHTML += '<div class="vacancies-container">';
+                
+                data.result.forEach((vacancy, idx) => {
+                    vacanciesHTML += '<div class="vacancy-card">';
+                    
+                    // Номер и заголовок
+                    vacanciesHTML += `<div class="vacancy-title">`;
+                    vacanciesHTML += `<span class="vacancy-number">${idx + 1}</span>`;
+                    vacanciesHTML += `<span>${vacancy.title || 'Без названия'}</span>`;
+                    vacanciesHTML += `</div>`;
+                    
+                    // Детали
+                    vacanciesHTML += '<div class="vacancy-details">';
+                    
+                    if (vacancy.company) {
+                        vacanciesHTML += `<div class="vacancy-detail"><span class="vacancy-detail-icon">🏢</span><span><strong>Компания:</strong> ${vacancy.company}</span></div>`;
+                    }
+                    
+                    if (vacancy.location) {
+                        vacanciesHTML += `<div class="vacancy-detail"><span class="vacancy-detail-icon">📍</span><span>${vacancy.location}</span></div>`;
+                    }
+                    
+                    if (vacancy.salary) {
+                        vacanciesHTML += `<div class="vacancy-detail"><span class="vacancy-detail-icon">💰</span><span><strong>${vacancy.salary}</strong></span></div>`;
+                    }
+                    
+                    if (vacancy.seniority_level) {
+                        const levelColors = {
+                            'Стажер': '#95c5ff',
+                            'Начальный': '#7dc87d',
+                            'Средний': '#ffb84d',
+                            'Продвинутый': '#ff9500',
+                            'Эксперт': '#ff6b6b',
+                            'Руководитель': '#b8860b'
+                        };
+                        const levelColor = levelColors[vacancy.seniority_level] || '#666';
+                        vacanciesHTML += `<div class="vacancy-detail"><span class="vacancy-detail-icon">📊</span><span><strong>Уровень:</strong> <span style="color: ${levelColor}; font-weight: 700;">${vacancy.seniority_level}</span></span></div>`;
+                    } else if (vacancy.experience) {
+                        vacanciesHTML += `<div class="vacancy-detail"><span class="vacancy-detail-icon">📊</span><span>Опыт: ${vacancy.experience}</span></div>`;
+                    }
+                    
+                    if (vacancy.job_type) {
+                        vacanciesHTML += `<div class="vacancy-detail"><span class="vacancy-detail-icon">⏰</span><span>${vacancy.job_type}</span></div>`;
+                    }
+                    
+                    vacanciesHTML += '</div>';
+                    
+                    // Описание с раскрытием/сворачиванием
+                    if (vacancy.description) {
+                        const fullDesc = vacancy.description;
+                        const previewDesc = fullDesc.length > 200 
+                            ? fullDesc.substring(0, 200) + '...' 
+                            : fullDesc;
+                        const hasMore = fullDesc.length > 200;
+                        
+                        vacanciesHTML += '<div class="vacancy-description">';
+                        vacanciesHTML += `<div class="description-preview" id="desc-vac-${vacancy.idx}" data-full="${fullDesc.replace(/"/g, '&quot;').replace(/'/g, '&#39;')}">${previewDesc.replace(/\n/g, '<br>')}</div>`;
+                        if (hasMore) {
+                            vacanciesHTML += `<button class="description-toggle" onclick="toggleDescription('vac-${vacancy.idx}')" id="toggle-vac-${vacancy.idx}">`;
+                            vacanciesHTML += '<span>Развернуть</span>';
+                            vacanciesHTML += '<span>▼</span>';
+                            vacanciesHTML += '</button>';
+                        }
+                        vacanciesHTML += '</div>';
+                    }
+                    
+                    // Навыки
+                    if (vacancy.key_skills) {
+                        const skills = vacancy.key_skills.split(',').map(s => s.trim()).filter(s => s);
+                        if (skills.length > 0) {
+                            vacanciesHTML += '<div class="vacancy-skills">';
+                            vacanciesHTML += '<div style="font-size: 13px; color: #666; margin-bottom: 8px;"><strong>Требуемые навыки:</strong></div>';
+                            vacanciesHTML += '<div class="vacancy-skills-tags">';
+                            skills.slice(0, 8).forEach(skill => {
+                                vacanciesHTML += `<span class="skill-tag">${skill}</span>`;
+                            });
+                            vacanciesHTML += '</div></div>';
+                        }
+                    }
+                    
+                    // Ссылка на HH.ru
+                    if (vacancy.hh_url) {
+                        vacanciesHTML += '<div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e8ecf0;">';
+                        vacanciesHTML += `<a href="${vacancy.hh_url}" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; text-decoration: none; border-radius: 20px; font-weight: 600; font-size: 14px; transition: all 0.3s; box-shadow: 0 2px 8px rgba(30, 60, 114, 0.3);">`;
+                        vacanciesHTML += '<span>🔗</span>';
+                        vacanciesHTML += '<span>Открыть на HH.ru</span>';
+                        vacanciesHTML += '</a>';
+                        vacanciesHTML += '</div>';
+                    }
+                    
+                    vacanciesHTML += '</div>';
+                });
+                
+                vacanciesHTML += '</div>';
+
+                addMessage('assistant', vacanciesHTML, true, true);
+                // Прокрутить к началу раздела "Найдено ... вакансий"
+                setTimeout(() => {
+                    const headerEl = document.getElementById(vacanciesHeaderId);
+                    if (headerEl) {
+                        headerEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        const prevShadow = headerEl.style.boxShadow || '';
+                        headerEl.style.boxShadow = '0 0 0 3px rgba(255, 213, 79, 0.7), 0 8px 22px rgba(255, 213, 79, 0.35)';
+                        setTimeout(() => {
+                            headerEl.style.boxShadow = prevShadow;
+                        }, 1600);
+                    }
+                }, 150);
+                showStatus(`Найдено ${data.result.length} вакансий!`, 'success');
+            } catch (error) {
+                showStatus('Ошибка: ' + error.message, 'error');
+                console.error('Error finding vacancies:', error);
+            }
+        }
+
+        function exportHistory(format) {
+            if (!sessionId) {
+                showStatus('Сначала создайте сессию', 'error');
+                return;
+            }
+            const fmt = (format || 'pdf').toLowerCase();
+            if (fmt !== 'pdf' && fmt !== 'docx') {
+                showStatus('Неверный формат. Доступны PDF или DOCX.', 'error');
+                return;
+            }
+            // Открываем прямую ссылку на скачивание — надежнее, чем fetch+blob
+            const url = `${API_BASE}/sessions/${sessionId}/export?format=${encodeURIComponent(fmt)}`;
+            const a = document.createElement('a');
+            a.href = url;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            showStatus(`Экспорт в ${fmt.toUpperCase()} запущен...`, 'info');
+        }
+
+        function showCareerDevelopment() {
+            const modal = document.getElementById('careerDevelopmentModal');
+            modal.style.display = 'flex';
+            // Очищаем поля при открытии
+            document.getElementById('targetPositionInput').value = '';
+            document.getElementById('targetFieldInput').value = '';
+            document.getElementById('targetSpecializationInput').value = '';
+        }
+
+        function closeCareerDevelopmentModal() {
+            const modal = document.getElementById('careerDevelopmentModal');
+            modal.style.display = 'none';
+        }
+
+        async function deleteSession(sessionIdToDelete) {
+            if (!confirm('Вы уверены, что хотите удалить этот чат? Это действие нельзя отменить.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/sessions/${sessionIdToDelete}`, {
+                    method: 'DELETE',
+                });
+
+                if (!response.ok) {
+                    throw new Error('Не удалось удалить сессию');
+                }
+
+                // Если удаляемая сессия была активной, очищаем текущую сессию
+                if (sessionIdToDelete === sessionId) {
+                    sessionId = null;
+                    localStorage.removeItem('career_session_id');
+                    
+                    // Очищаем чат
+                    const chatContainer = document.getElementById('chatContainer');
+                    chatContainer.innerHTML = '<div class="welcome-message"><div class="welcome-icon">💹</div><h2>Добро пожаловать!</h2><p>Я ваш персональный карьерный консультант для финансового сектора</p><p>Помогу найти подходящие вакансии и построить карьерную траекторию</p><p style="margin-top: 20px; font-weight: 600; color: #1e3c72;">Начните с того, что расскажите о себе</p></div>';
+                    document.getElementById('actions').style.display = 'none';
+                    interviewDone = false;
+                }
+
+                // Всегда обновляем список сессий после удаления
+                await loadSessionsList();
+
+                // Убрано showStatus для предотвращения дергания экрана
+            } catch (error) {
+                showStatus('Ошибка: ' + error.message, 'error');
+                console.error('Error deleting session:', error);
+            }
+        }
+
+        async function getCareerDevelopment() {
+            if (!sessionId) {
+                showStatus('Сначала создайте сессию', 'error');
+                return;
+            }
+
+            const targetPosition = document.getElementById('targetPositionInput').value.trim();
+            if (!targetPosition) {
+                showStatus('Укажите желаемую позицию', 'error');
+                return;
+            }
+
+            const targetField = document.getElementById('targetFieldInput').value.trim() || null;
+            const targetSpecialization = document.getElementById('targetSpecializationInput').value.trim() || null;
+
+            try {
+                showStatus('Анализ развития карьеры...', 'info');
+                closeCareerDevelopmentModal();
+
+                const response = await fetch(`${API_BASE}/match/career-development`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        session_id: sessionId,
+                        target_position: targetPosition,
+                        target_field: targetField,
+                        target_specialization: targetSpecialization,
+                    })
+                });
+
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        showStatus('Профиль не найден. Сначала получите профиль.', 'error');
+                        return;
+                    }
+                    const errorText = await response.text();
+                    showStatus('Ошибка: ' + errorText, 'error');
+                    return;
+                }
+
+                const data = await response.json();
+                
+                // Форматируем результат в красивый HTML
+                let developmentHTML = '<div class="profile-container">';
+                
+                // Заголовок
+                const careerHeaderId = `career-plan-header-${Date.now()}`;
+                developmentHTML += `<div id="${careerHeaderId}" style="margin-bottom: 24px; padding: 20px; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; border-radius: 16px; text-align: center;">`;
+                developmentHTML += `<div style="font-size: 22px; font-weight: 700; margin-bottom: 8px;">🚀 План развития карьеры</div>`;
+                developmentHTML += `<div style="font-size: 16px; opacity: 0.95;">${data.current_position || 'Текущая позиция'} → ${data.target_position}</div>`;
+                developmentHTML += `</div>`;
+                
+                // Анализ разрыва
+                if (data.gap_analysis) {
+                    developmentHTML += '<div class="profile-section">';
+                    developmentHTML += '<div class="profile-section-title">📊 Анализ разрыва</div>';
+                    developmentHTML += '<div class="profile-section-content">';
+                    developmentHTML += `<div class="profile-item"><div class="profile-item-details">${data.gap_analysis.replace(/\n/g, '<br>')}</div></div>`;
+                    developmentHTML += '</div></div>';
+                }
+                
+                // Курсы
+                if (data.courses && data.courses.length > 0) {
+                    developmentHTML += '<div class="profile-section">';
+                    developmentHTML += '<div class="profile-section-title">📚 Рекомендуемые курсы</div>';
+                    developmentHTML += '<div class="profile-section-content">';
+                    
+                    data.courses.forEach((course, idx) => {
+                        developmentHTML += '<div class="vacancy-card" style="margin-bottom: 16px;">';
+                        developmentHTML += `<div class="vacancy-title"><span class="vacancy-number">${idx + 1}</span><span>${course.name || 'Курс'}</span></div>`;
+                        
+                        developmentHTML += '<div class="vacancy-details">';
+                        if (course.provider) {
+                            developmentHTML += `<div class="vacancy-detail"><span class="vacancy-detail-icon">🏫</span><span><strong>Провайдер:</strong> ${course.provider}</span></div>`;
+                        }
+                        if (course.level) {
+                            developmentHTML += `<div class="vacancy-detail"><span class="vacancy-detail-icon">📊</span><span>Уровень: ${course.level}</span></div>`;
+                        }
+                        if (course.language) {
+                            developmentHTML += `<div class="vacancy-detail"><span class="vacancy-detail-icon">🌐</span><span>Язык: ${course.language}</span></div>`;
+                        }
+                        developmentHTML += '</div>';
+                        
+                        if (course.description) {
+                            const fullDesc = course.description;
+                            const previewDesc = fullDesc.length > 200 
+                                ? fullDesc.substring(0, 200) + '...' 
+                                : fullDesc;
+                            const hasMore = fullDesc.length > 200;
+                            
+                            developmentHTML += '<div class="vacancy-description">';
+                            developmentHTML += `<div class="description-preview" id="desc-course-${course.idx}" data-full="${fullDesc.replace(/"/g, '&quot;')}">${previewDesc.replace(/\n/g, '<br>')}</div>`;
+                            if (hasMore) {
+                                developmentHTML += `<button class="description-toggle" onclick="toggleDescription('course-${course.idx}')" id="toggle-course-${course.idx}">`;
+                                developmentHTML += '<span>Развернуть</span>';
+                                developmentHTML += '<span>▼</span>';
+                                developmentHTML += '</button>';
+                            }
+                            developmentHTML += '</div>';
+                        }
+                        
+                        if (course.skills) {
+                            const skills = course.skills.split(',').map(s => s.trim()).filter(s => s);
+                            if (skills.length > 0) {
+                                developmentHTML += '<div class="vacancy-skills">';
+                                developmentHTML += '<div style="font-size: 13px; color: #666; margin-bottom: 8px;"><strong>Навыки:</strong></div>';
+                                developmentHTML += '<div class="vacancy-skills-tags">';
+                                skills.slice(0, 5).forEach(skill => {
+                                    developmentHTML += `<span class="skill-tag">${skill}</span>`;
+                                });
+                                developmentHTML += '</div></div>';
+                            }
+                        }
+                        
+                        if (course.url) {
+                            developmentHTML += '<div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e8ecf0;">';
+                            developmentHTML += `<a href="${course.url}" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; text-decoration: none; border-radius: 20px; font-weight: 600; font-size: 14px; transition: all 0.3s; box-shadow: 0 2px 8px rgba(30, 60, 114, 0.3);">`;
+                            developmentHTML += '<span>🔗</span>';
+                            developmentHTML += '<span>Перейти к курсу</span>';
+                            developmentHTML += '</a>';
+                            developmentHTML += '</div>';
+                        }
+                        
+                        developmentHTML += '</div>';
+                    });
+                    
+                    developmentHTML += '</div></div>';
+                } else {
+                    developmentHTML += '<div class="profile-section">';
+                    developmentHTML += '<div class="profile-section-title">📚 Рекомендуемые курсы</div>';
+                    developmentHTML += '<div class="profile-section-content">';
+                    developmentHTML += '<div class="profile-item"><div class="profile-item-details">Курсы будут сгенерированы на основе анализа разрыва. Пожалуйста, обновите страницу и попробуйте снова.</div></div>';
+                    developmentHTML += '</div></div>';
+                }
+                
+                // Вакансии на пути к цели
+                if (data.future_vacancies && data.future_vacancies.length > 0) {
+                    developmentHTML += '<div class="profile-section">';
+                    developmentHTML += '<div class="profile-section-title">🎯 Вакансии на пути к цели</div>';
+                    developmentHTML += '<div class="profile-section-content">';
+                    developmentHTML += '<div style="margin-bottom: 16px; padding: 16px; background: #f0f4ff; border-radius: 12px; border-left: 4px solid #1e3c72;">';
+                    developmentHTML += '<div style="font-weight: 600; color: #1e3c72; margin-bottom: 8px;">💡 После прохождения курсов вы сможете претендовать на эти позиции:</div>';
+                    developmentHTML += '</div>';
+                    
+                    data.future_vacancies.forEach((vacancy, idx) => {
+                        developmentHTML += '<div class="vacancy-card" style="margin-bottom: 16px;">';
+                        developmentHTML += `<div class="vacancy-title"><span class="vacancy-number">${idx + 1}</span><span>${vacancy.title || 'Вакансия'}</span></div>`;
+                        
+                        developmentHTML += '<div class="vacancy-details">';
+                        if (vacancy.company) {
+                            developmentHTML += `<div class="vacancy-detail"><span class="vacancy-detail-icon">🏢</span><span><strong>Компания:</strong> ${vacancy.company}</span></div>`;
+                        }
+                        if (vacancy.location) {
+                            developmentHTML += `<div class="vacancy-detail"><span class="vacancy-detail-icon">📍</span><span>${vacancy.location}</span></div>`;
+                        }
+                        if (vacancy.salary) {
+                            developmentHTML += `<div class="vacancy-detail"><span class="vacancy-detail-icon">💰</span><span><strong>${vacancy.salary}</strong></span></div>`;
+                        }
+                        if (vacancy.seniority_level) {
+                            const levelColors = {
+                                'Стажер': '#95c5ff',
+                                'Начальный': '#7dc87d',
+                                'Средний': '#ffb84d',
+                                'Продвинутый': '#ff9500',
+                                'Эксперт': '#ff6b6b',
+                                'Руководитель': '#b8860b'
+                            };
+                            const levelColor = levelColors[vacancy.seniority_level] || '#666';
+                            developmentHTML += `<div class="vacancy-detail"><span class="vacancy-detail-icon">📊</span><span><strong>Уровень:</strong> <span style="color: ${levelColor}; font-weight: 700;">${vacancy.seniority_level}</span></span></div>`;
+                        }
+                        developmentHTML += '</div>';
+                        
+                        if (vacancy.description) {
+                            const fullDesc = vacancy.description;
+                            const previewDesc = fullDesc.length > 200 
+                                ? fullDesc.substring(0, 200) + '...' 
+                                : fullDesc;
+                            const hasMore = fullDesc.length > 200;
+                            
+                            developmentHTML += '<div class="vacancy-description">';
+                            developmentHTML += `<div class="description-preview" id="desc-dev-${vacancy.idx}" data-full="${fullDesc.replace(/"/g, '&quot;')}">${previewDesc.replace(/\n/g, '<br>')}</div>`;
+                            if (hasMore) {
+                                developmentHTML += `<button class="description-toggle" onclick="toggleDescription('dev-${vacancy.idx}')" id="toggle-dev-${vacancy.idx}">`;
+                                developmentHTML += '<span>Развернуть</span>';
+                                developmentHTML += '<span>▼</span>';
+                                developmentHTML += '</button>';
+                            }
+                            developmentHTML += '</div>';
+                        }
+                        
+                        if (vacancy.hh_url) {
+                            developmentHTML += '<div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e8ecf0;">';
+                            developmentHTML += `<a href="${vacancy.hh_url}" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; text-decoration: none; border-radius: 20px; font-weight: 600; font-size: 14px; transition: all 0.3s; box-shadow: 0 2px 8px rgba(30, 60, 114, 0.3);">`;
+                            developmentHTML += '<span>🔗</span>';
+                            developmentHTML += '<span>Открыть на HH.ru</span>';
+                            developmentHTML += '</a>';
+                            developmentHTML += '</div>';
+                        }
+                        
+                        developmentHTML += '</div>';
+                    });
+                    
+                    developmentHTML += '</div></div>';
+                }
+                
+                developmentHTML += '</div>';
+
+                addMessage('assistant', developmentHTML, true, true);
+                showStatus('План развития карьеры готов!', 'success');
+                
+                // Прокручиваем к плашке "План развития карьеры"
+                setTimeout(() => {
+                    const headerEl = document.getElementById(careerHeaderId);
+                    if (headerEl) {
+                        headerEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        const prevShadow = headerEl.style.boxShadow || '';
+                        headerEl.style.boxShadow = '0 0 0 3px rgba(255, 213, 79, 0.7), 0 8px 22px rgba(255, 213, 79, 0.35)';
+                        setTimeout(() => {
+                            headerEl.style.boxShadow = prevShadow;
+                        }, 1600);
+                    }
+                }, 300);
+            } catch (error) {
+                showStatus('Ошибка: ' + error.message, 'error');
+                console.error('Error getting career development:', error);
+            }
+        }
+
+        function toggleDescription(id) {
+            const descElement = document.getElementById(`desc-${id}`);
+            const toggleButton = document.getElementById(`toggle-${id}`);
+            
+            if (!descElement || !toggleButton) return;
+            
+            const isExpanded = descElement.classList.contains('expanded');
+            const fullText = descElement.getAttribute('data-full');
+            
+            if (isExpanded) {
+                // Сворачиваем
+                const previewText = fullText.length > 200 
+                    ? fullText.substring(0, 200) + '...' 
+                    : fullText;
+                descElement.innerHTML = previewText.replace(/\n/g, '<br>');
+                descElement.classList.remove('expanded');
+                toggleButton.innerHTML = '<span>Развернуть</span><span>▼</span>';
+            } else {
+                // Раскрываем
+                descElement.innerHTML = fullText.replace(/\n/g, '<br>');
+                descElement.classList.add('expanded');
+                toggleButton.innerHTML = '<span>Свернуть</span><span>▲</span>';
+            }
+        }
+    </script>
+</body>
+</html>
+
