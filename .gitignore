@@ -36,7 +36,7 @@ logs/
 Thumbs.db
 
 # Project specific
-data/embeddings/
+# data/embeddings/  # Отключено для Git LFS - эмбеддинги хранятся через Git LFS
 data/faiss_indexes/
 data/*.parquet
 *.pkl
