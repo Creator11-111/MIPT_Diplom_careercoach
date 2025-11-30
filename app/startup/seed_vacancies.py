@@ -89,3 +89,5 @@ async def seed_vacancies_if_needed() -> None:
 
 
 
+
+

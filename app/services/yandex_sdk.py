@@ -131,3 +131,5 @@ def embed_text(text: str, model_kind: str = "query") -> np.ndarray:
 
 
 
+
+

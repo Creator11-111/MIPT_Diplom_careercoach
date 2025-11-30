@@ -148,3 +148,5 @@ financial_coach/data/financial_vacancies.parquet
 
 
 
+
+
