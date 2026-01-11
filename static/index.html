@@ -1,0 +1,2030 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="AI-коуч для развития карьеры в финансовом секторе">
+    <meta name="theme-color" content="#10a37f">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="/static/manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Финансовый Карьерный Коуч</title>
+    <style>
+        :root {
+            --primary: #10a37f;
+            --primary-light: #1ec99b;
+            --primary-dark: #0d8a6a;
+            --bg: #1a1a2e;
+            --sidebar-bg: #16162a;
+            --ai-bg: #252542;
+            --text: #f0f0f5;
+            --text-dim: #9898b0;
+            --border: #3d3d5c;
+            --input-bg: #2a2a45;
+            --accent: #6366f1;
+            --accent-light: #818cf8;
+            --gold: #fbbf24;
+            --success: #22c55e;
+            --danger: #ef4444;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--bg) 0%, #0f0f1a 50%, #1a0f2e 100%);
+            background-attachment: fixed;
+            color: var(--text);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+            position: relative;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(16, 163, 127, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(99, 102, 241, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, var(--sidebar-bg) 0%, rgba(22, 22, 42, 0.95) 100%);
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+            transition: transform 0.3s ease;
+            z-index: 100;
+            border-right: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+            box-shadow: 4px 0 20px rgba(0,0,0,0.3);
+        }
+
+        .new-chat { 
+            padding: 14px 18px; 
+            border: 1px solid var(--border);
+            border-radius: 12px; 
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white; 
+            cursor: pointer; 
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 16px; 
+            width: 100%;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(16, 163, 127, 0.3);
+        }
+        .new-chat:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 163, 127, 0.4);
+        }
+
+        .history-list {
+            flex: 1;
+            overflow-y: auto;
+            margin-top: 8px;
+        }
+
+        .history-item {
+            padding: 12px 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            color: var(--text-dim);
+            font-size: 13px;
+            margin-bottom: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+        .history-item:hover { 
+            background: rgba(99, 102, 241, 0.1);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+        .history-item.active { 
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(16, 163, 127, 0.2) 100%);
+            border-color: var(--primary);
+            color: var(--text);
+            font-weight: 500;
+        }
+        .history-item-content {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .history-item-delete {
+            opacity: 0;
+            transition: opacity 0.2s;
+            cursor: pointer;
+            color: var(--danger);
+            font-size: 18px;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .history-item:hover .history-item-delete {
+            opacity: 1;
+        }
+        .history-item-delete:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        .main { flex: 1; display: flex; flex-direction: column; position: relative; }
+
+        .mobile-header { 
+            display: none; 
+            padding: 12px 20px; 
+            border-bottom: 1px solid var(--border); 
+            height: 56px; 
+            align-items: center; 
+            justify-content: center; 
+            position: relative;
+            background: var(--sidebar-bg);
+        }
+        .menu-btn { 
+            background: none; 
+            border: none; 
+            color: var(--text); 
+            font-size: 24px; 
+            position: absolute; 
+            left: 16px; 
+            cursor: pointer;
+        }
+        .mobile-header-title {
+            font-weight: 600;
+            font-size: 16px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .chat { flex: 1; overflow-y: auto; padding-bottom: 140px; scroll-behavior: smooth; }
+
+        /* Welcome Screen */
+        .welcome { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100%; 
+            text-align: center; 
+            padding: 30px;
+        }
+        .welcome h1 { 
+            font-size: 42px; 
+            margin-bottom: 16px; 
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--accent-light) 50%, var(--gold) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+            line-height: 1.2;
+        }
+        .welcome-subtitle {
+            font-size: 18px;
+            color: var(--text-dim);
+            margin-bottom: 48px;
+            font-weight: 400;
+            line-height: 1.6;
+        }
+
+        .grid { 
+            display: flex; 
+            justify-content: center;
+            align-items: center;
+            gap: 16px; 
+            max-width: 600px;
+            width: 100%;
+        }
+        .welcome-features {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 32px;
+            color: var(--text-dim);
+            font-size: 15px;
+        }
+        .feature-item {
+            padding: 8px 0;
+        }
+        .card { 
+            background: linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%);
+            padding: 24px; 
+            border-radius: 18px; 
+            cursor: pointer; 
+            font-size: 16px;
+            font-weight: 600;
+            border: 1px solid var(--border);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+        .card-main {
+            min-width: 320px;
+            max-width: 400px;
+            width: 100%;
+            padding: 32px;
+            font-size: 18px;
+            text-align: center;
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+        .card:hover::before {
+            transform: scaleX(1);
+        }
+        .card:hover { 
+            background: linear-gradient(145deg, rgba(99, 102, 241, 0.2) 0%, rgba(16, 163, 127, 0.15) 100%);
+            border-color: var(--primary);
+            transform: translateY(-6px);
+            box-shadow: 0 16px 40px rgba(16, 163, 127, 0.3);
+        }
+        .card:active { transform: translateY(-3px); }
+        .card-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+        .card-sub { 
+            font-size: 13px; 
+            color: var(--text-dim); 
+            margin-top: 10px;
+            font-weight: 400;
+            line-height: 1.5;
+        }
+
+        /* Messages */
+        .msg { 
+            padding: 24px 30px; 
+            display: flex; 
+            gap: 16px; 
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .msg.ai { 
+            background: linear-gradient(135deg, rgba(37, 37, 66, 0.6) 0%, rgba(25, 25, 42, 0.8) 100%);
+            backdrop-filter: blur(10px);
+        }
+        .msg-content { 
+            max-width: 800px; 
+            width: 100%; 
+            line-height: 1.7; 
+            font-size: 15px;
+        }
+        .msg-content a {
+            color: var(--primary-light);
+            text-decoration: none;
+            font-weight: 500;
+            border-bottom: 1px dashed var(--primary);
+            transition: all 0.2s;
+        }
+        .msg-content a:hover {
+            color: var(--gold);
+            border-color: var(--gold);
+        }
+
+        .avatar { 
+            width: 36px; 
+            height: 36px; 
+            border-radius: 10px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            flex-shrink: 0; 
+            font-size: 18px;
+        }
+        .avatar.user { background: linear-gradient(135deg, var(--accent) 0%, #4f46e5 100%); }
+        .avatar.ai { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); }
+
+        /* Input Area */
+        .input-area { 
+            position: sticky; 
+            bottom: 0; 
+            width: 100%; 
+            background: linear-gradient(180deg, transparent 0%, var(--bg) 30%);
+            padding: 20px 30px 25px; 
+            display: flex; 
+            justify-content: center; 
+            z-index: 50;
+        }
+        .input-wrap { 
+            max-width: 800px; 
+            width: 100%; 
+            background: linear-gradient(145deg, rgba(42, 42, 69, 0.8) 0%, rgba(30, 30, 50, 0.9) 100%);
+            border-radius: 18px; 
+            border: 1px solid var(--border);
+            display: flex; 
+            align-items: flex-end; 
+            padding: 14px 18px; 
+            position: relative; 
+            gap: 12px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+        }
+        .input-wrap:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 12px 40px rgba(16, 163, 127, 0.3);
+            transform: translateY(-2px);
+        }
+
+        textarea { 
+            width: 100%; 
+            background: none; 
+            border: none; 
+            color: var(--text); 
+            font-size: 15px; 
+            resize: none; 
+            max-height: 200px; 
+            outline: none; 
+            font-family: inherit;
+            min-height: 24px;
+            line-height: 1.5;
+        }
+        .send { 
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border: none; 
+            cursor: pointer; 
+            color: white;
+            padding: 10px 14px; 
+            font-size: 16px;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+        .send:hover { 
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(16, 163, 127, 0.4);
+        }
+        .send:disabled { 
+            opacity: 0.4; 
+            cursor: not-allowed; 
+            transform: none;
+            box-shadow: none;
+        }
+
+        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 90; backdrop-filter: blur(4px); }
+        .overlay.on { display: block; }
+
+        /* Typing Animation */
+        .typing-dots { display: flex; gap: 6px; padding: 8px 0; }
+        .dot { width: 8px; height: 8px; background: var(--primary); border-radius: 50%; animation: bounce 1.4s infinite; }
+        .dot:nth-child(1) { animation-delay: -0.32s; }
+        .dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+
+        /* Buttons */
+        .btn { 
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white; 
+            border: none; 
+            padding: 14px 24px; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            font-size: 14px;
+            font-weight: 600;
+            margin: 5px;
+            min-width: 140px;
+            flex: 1;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(16, 163, 127, 0.3);
+        }
+        .btn:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 163, 127, 0.4);
+        }
+        .btn:active { transform: translateY(0); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        /* Vacancy & Course Cards */
+        .vacancy-card, .course-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 18px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .vacancy-card:hover, .course-card:hover {
+            border-color: var(--primary);
+            transform: translateX(6px);
+            box-shadow: 0 8px 24px rgba(16, 163, 127, 0.2);
+        }
+        .vacancy-level-badge {
+            display: inline-block;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .vacancy-description {
+            border-left: 3px solid var(--primary);
+            padding-left: 12px;
+        }
+        .vacancy-title, .course-title { 
+            font-size: 17px; 
+            font-weight: 600; 
+            color: var(--primary-light); 
+            margin-bottom: 8px;
+        }
+        .vacancy-info, .course-info { 
+            font-size: 13px; 
+            color: var(--text-dim); 
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .vacancy-link, .course-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 10px;
+            padding: 10px 16px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white !important;
+            border-radius: 8px;
+            text-decoration: none !important;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 8px rgba(16, 163, 127, 0.3);
+        }
+        .vacancy-link:hover, .course-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(16, 163, 127, 0.5);
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+        }
+        .vacancy-link:active, .course-link:active {
+            transform: translateY(0);
+        }
+
+        /* Profile Card */
+        .profile-card {
+            background: linear-gradient(145deg, rgba(99, 102, 241, 0.15) 0%, rgba(16, 163, 127, 0.1) 100%);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 28px;
+            margin: 20px 0;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+        .profile-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--accent), var(--primary));
+            background-size: 200% 100%;
+            animation: gradientShift 3s ease infinite;
+        }
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        .profile-section {
+            margin-bottom: 20px;
+        }
+        .profile-section:last-child {
+            margin-bottom: 0;
+        }
+        .profile-section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--primary-light);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .profile-item {
+            font-size: 14px;
+            color: var(--text);
+            margin-bottom: 6px;
+            padding-left: 12px;
+            border-left: 2px solid var(--primary);
+        }
+        .profile-tag {
+            display: inline-block;
+            background: rgba(16, 163, 127, 0.2);
+            color: var(--primary-light);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            margin: 3px;
+        }
+
+        /* Toast notifications */
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--ai-bg);
+            color: var(--text);
+            padding: 16px 28px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+            z-index: 1000;
+            max-width: 90%;
+            min-width: 300px;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+            pointer-events: none;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+            pointer-events: auto;
+        }
+        .toast.error { border-color: var(--danger); }
+        .toast.success { border-color: var(--success); }
+        .toast.warning { border-color: var(--gold); }
+
+        /* Progress indicator */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--accent), var(--primary));
+            background-size: 200% 100%;
+            animation: progressMove 1.5s ease infinite;
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+            z-index: 9999;
+            width: 100%;
+        }
+        .progress-bar.active {
+            transform: scaleX(1);
+        }
+        @keyframes progressMove {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Mobile & Touch Optimization */
+        @media (max-width: 768px) {
+            .sidebar { 
+                position: fixed; 
+                height: 100%; 
+                width: 300px; 
+                transform: translateX(-100%); 
+                box-shadow: 4px 0 20px rgba(0,0,0,0.5);
+            }
+            .sidebar.open { transform: translateX(0); }
+            .mobile-header { display: flex; }
+            .msg { padding: 18px 16px; gap: 12px; }
+            .msg-content { font-size: 16px; }
+            .avatar { width: 32px; height: 32px; font-size: 16px; }
+            .welcome h1 { font-size: 26px; }
+            .welcome-subtitle { font-size: 14px; }
+            .grid { grid-template-columns: 1fr; gap: 14px; max-width: 100%; }
+            .card { padding: 18px; font-size: 15px; }
+            .input-area { 
+                position: fixed; 
+                left: 0; 
+                right: 0; 
+                bottom: 0; 
+                padding: 14px 16px 20px;
+            }
+            .input-wrap { padding: 10px 14px; }
+            textarea { font-size: 16px; }
+            .send { padding: 10px 14px; }
+            .btn { min-width: 100%; padding: 14px 20px; font-size: 15px; margin: 6px 0; }
+            .action-buttons { flex-direction: column; gap: 0; }
+            .chat { padding-bottom: 120px; }
+            .toast { bottom: 130px; }
+            footer {
+                bottom: 12px;
+                left: 12px;
+                font-size: 12px;
+            }
+            
+            @supports (padding-bottom: env(safe-area-inset-bottom)) {
+                .input-area { padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
+            }
+        }
+        
+        @media (min-width: 1400px) {
+            .msg-content { max-width: 900px; }
+            .input-wrap { max-width: 900px; }
+            .grid { max-width: 800px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="progressBar"></div>
+    <div class="toast" id="toast"></div>
+    <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+    <div class="sidebar" id="sidebar">
+        <button class="new-chat" onclick="newChat()">+ Новый чат</button>
+        <div class="history-list" id="historyList"></div>
+    </div>
+
+    <div class="main">
+        <div class="mobile-header">
+            <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+            <div class="mobile-header-title">Finance Coach</div>
+        </div>
+
+        <div class="chat" id="chat">
+            <div class="welcome" id="welcome">
+                <h1>Финансовый Карьерный Коуч</h1>
+                <p class="welcome-subtitle">AI-помощник для развития карьеры в финансовом секторе</p>
+                <div class="welcome-features">
+                    <div class="feature-item">🤖 Интеллектуальное интервью</div>
+                    <div class="feature-item">🔍 Семантический поиск вакансий</div>
+                    <div class="feature-item">📈 Персонализированные рекомендации</div>
+                </div>
+                <div class="grid">
+                    <div class="card card-main" onclick="handleCardClick('Хочу найти работу в финансах')">
+                        <div class="card-icon">💼</div>
+                        "Хочу найти работу в финансах"
+                        <div class="card-sub">Интервью и поиск вакансий</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-area">
+            <div class="input-wrap">
+                <textarea id="input" rows="1" placeholder="Напишите сообщение..." oninput="resize(this)" onkeydown="enter(event)"></textarea>
+                <button class="send" id="sendBtn" onclick="sendMsg()" disabled>➤</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = window.location.origin + '/v1';  // Using versioned API
+        let sessionId = localStorage.getItem('sid');
+        let sending = false;
+        let userId = localStorage.getItem('userId') || null;
+        let globalProfileCache = null; // Кэш профиля для использования в разных функциях
+
+        // Toast notifications
+        function showToast(message, type = 'info', duration = 4000) {
+            const toast = document.getElementById('toast');
+            if (!toast) return;
+            toast.textContent = message;
+            toast.className = 'toast show ' + type;
+            setTimeout(() => toast.classList.remove('show'), duration);
+        }
+
+        // Progress bar
+        function showProgress() {
+            const bar = document.getElementById('progressBar');
+            if (bar) bar.classList.add('active');
+        }
+        function hideProgress() {
+            const bar = document.getElementById('progressBar');
+            if (bar) bar.classList.remove('active');
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('on');
+        }
+        function closeSidebar() { 
+            document.getElementById('sidebar').classList.remove('open'); 
+            document.getElementById('overlay').classList.remove('on'); 
+        }
+
+        function resize(t) { 
+            t.style.height = 'auto'; 
+            t.style.height = Math.min(t.scrollHeight, 200) + 'px'; 
+            const sendBtn = document.getElementById('sendBtn');
+            if (sendBtn) sendBtn.disabled = !t.value.trim() || sending;
+        }
+        
+        function enter(e) { 
+            if (e.key === 'Enter' && !e.shiftKey) { 
+                e.preventDefault(); 
+                sendMsg(); 
+            } 
+        }
+
+        function scrollToTop() {
+            const chat = document.getElementById('chat');
+            if (chat) chat.scrollTop = 0;
+        }
+        
+        function scrollToBottom() { 
+            const chat = document.getElementById('chat');
+            if (chat) chat.scrollTop = chat.scrollHeight;
+        }
+
+        async function retry(url, opt = {}, n = 3) {
+            for (let i = 0; i < n; i++) {
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 60000);
+                    const r = await fetch(url, { ...opt, signal: controller.signal });
+                    clearTimeout(timeoutId);
+                    if (r.status >= 500) throw new Error(`Server error: ${r.status}`);
+                    return r;
+                } catch (e) { 
+                    if (i === n - 1) throw e; 
+                    await new Promise(r => setTimeout(r, 1000 * (i + 1)));
+                }
+            }
+        }
+
+        async function init() {
+            showProgress();
+            try { 
+                // Health endpoints don't use versioning
+                await retry(`${window.location.origin}/health`, {}, 5);
+                const readyR = await retry(`${window.location.origin}/ready`, {}, 3);
+                if (readyR.ok) {
+                    const readyData = await readyR.json();
+                    if (readyData.ready) {
+                        showToast("✅ Система готова к работе", "success", 2000);
+                    }
+                }
+            } catch { 
+                showToast("⚠️ Сервер недоступен. Обновите страницу.", "error"); 
+                hideProgress();
+                return; 
+            }
+            
+            await loadHistory();
+            if (sessionId) await load(sessionId);
+            hideProgress();
+        }
+
+        async function loadHistory() {
+            if (!userId) return;
+            try {
+                const r = await retry(`${API}/sessions?user_id=${userId}`, {}, 3);
+                if (!r.ok) return;
+                
+                const data = await r.json();
+                const sessions = data.sessions || [];
+                const historyList = document.getElementById('historyList');
+                if (!historyList) return;
+                
+                sessions.sort((a, b) => new Date(b.last_updated_at || 0) - new Date(a.last_updated_at || 0));
+                historyList.innerHTML = '';
+                
+                if (sessions.length === 0) {
+                    historyList.innerHTML = '<div style="padding:15px;color:var(--text-dim);font-size:13px;text-align:center;">Нет сохраненных чатов</div>';
+                    return;
+                }
+                
+                sessions.forEach(session => {
+                    const item = document.createElement('div');
+                    const isActive = session.session_id === sessionId;
+                    item.className = 'history-item' + (isActive ? ' active' : '');
+                    item.onclick = () => { 
+                        closeSidebar(); 
+                        load(session.session_id); 
+                    };
+                    
+                    const content = document.createElement('div');
+                    content.className = 'history-item-content';
+                    content.textContent = session.preview || `Чат ${session.session_id.substring(0, 8)}`;
+                    
+                    const deleteBtn = document.createElement('span');
+                    deleteBtn.className = 'history-item-delete';
+                    deleteBtn.textContent = '×';
+                    deleteBtn.onclick = (e) => { 
+                        e.stopPropagation(); 
+                        deleteSession(session.session_id); 
+                    };
+                    
+                    item.appendChild(content);
+                    item.appendChild(deleteBtn);
+                    historyList.appendChild(item);
+                });
+            } catch (e) {
+                console.error('Failed to load history:', e);
+            }
+        }
+
+        async function deleteSession(id) {
+            if (!confirm('Удалить этот чат?')) return;
+            showProgress();
+            try {
+                const r = await retry(`${API}/sessions/${id}`, { method: 'DELETE' }, 3);
+                if (r.ok) {
+                    if (sessionId === id) {
+                        sessionId = null;
+                        localStorage.removeItem('sid');
+                        globalProfileCache = null;
+                        const chat = document.getElementById('chat');
+                        if (chat) chat.innerHTML = getWelcomeHTML();
+                    }
+                    await loadHistory();
+                    showToast("✅ Чат удален", "success", 2000);
+                }
+            } catch (e) {
+                showToast("⚠️ Не удалось удалить чат", "error");
+            } finally {
+                hideProgress();
+            }
+        }
+
+        function getWelcomeHTML() {
+            return `
+                <div class="welcome" id="welcome">
+                    <h1>Финансовый Карьерный Коуч</h1>
+                    <p class="welcome-subtitle">AI-помощник для развития карьеры в финансовом секторе</p>
+                    <div class="welcome-features">
+                        <div class="feature-item">🤖 Интеллектуальное интервью</div>
+                        <div class="feature-item">🔍 Семантический поиск вакансий</div>
+                        <div class="feature-item">📈 Персонализированные рекомендации</div>
+                    </div>
+                    <div class="grid">
+                        <div class="card card-main" onclick="handleCardClick('Хочу найти работу в финансах')">
+                            <div class="card-icon">💼</div>
+                            "Хочу найти работу в финансах"
+                            <div class="card-sub">Интервью и поиск вакансий</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function newChat() {
+            sessionId = null;
+            localStorage.removeItem('sid');
+            globalProfileCache = null;
+            const chat = document.getElementById('chat');
+            if (chat) chat.innerHTML = getWelcomeHTML();
+            closeSidebar();
+            await loadHistory();
+        }
+
+        async function createSession(chatType = null) {
+            try {
+                const payload = userId ? { user_id: userId } : {};
+                const r = await retry(`${API}/sessions`, { 
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                }, 5);
+                if (!r.ok) throw new Error(`Failed: ${r.status}`);
+                
+                const d = await r.json();
+                sessionId = d.session_id;
+                localStorage.setItem('sid', sessionId);
+                if (!userId && d.user_id) {
+                    userId = d.user_id;
+                    localStorage.setItem('userId', userId);
+                }
+                
+                // Если есть тип чата, отправляем его как первое сообщение для контекста
+                if (chatType && chatType !== 'Хочу найти работу в финансах') {
+                    // Отправляем сообщение с типом чата для контекста
+                    try {
+                        await retry(`${API}/chat/${sessionId}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ text: `Начало работы в разделе: ${chatType}` })
+                        }, 2);
+                    } catch (e) {
+                        // Игнорируем ошибку, продолжаем
+                    }
+                }
+                
+                // Ждём приветственное сообщение
+                for (let i = 0; i < 5; i++) {
+                    await new Promise(r => setTimeout(r, 500));
+                    await load(sessionId);
+                    if (document.querySelector('.msg.ai')) break;
+                }
+                await loadHistory();
+                return sessionId;
+            } catch (e) {
+                console.error('Create session failed:', e);
+                throw e;
+            }
+        }
+
+        // Проверяем, есть ли уже профиль у пользователя (в любой сессии)
+        async function checkExistingProfile() {
+            if (globalProfileCache) return globalProfileCache;
+            
+            // Пробуем получить профиль из текущей сессии
+            if (sessionId) {
+                try {
+                    const r = await retry(`${API}/profile/${sessionId}`, {}, 2);
+                    if (r.ok) {
+                        const data = await r.json();
+                        globalProfileCache = data.profile;
+                        return globalProfileCache;
+                    }
+                } catch (e) {}
+            }
+            
+            // Пробуем найти профиль по user_id (более надежный способ)
+            if (userId) {
+                try {
+                    const r = await retry(`${API}/profile/by-user/${userId}`, {}, 2);
+                    if (r.ok) {
+                        const data = await r.json();
+                        globalProfileCache = data.profile;
+                        return globalProfileCache;
+                    }
+                } catch (e) {}
+                
+                // Если не нашли по user_id, пробуем через сессии
+                try {
+                    const sessionsR = await retry(`${API}/sessions?user_id=${userId}`, {}, 2);
+                    if (sessionsR.ok) {
+                        const sessionsData = await sessionsR.json();
+                        const sessions = sessionsData.sessions || [];
+                        
+                        for (const sess of sessions) {
+                            if (sess.session_id === sessionId) continue;
+                            try {
+                                const r = await retry(`${API}/profile/${sess.session_id}`, {}, 1);
+                                if (r.ok) {
+                                    const data = await r.json();
+                                    globalProfileCache = data.profile;
+                                    return globalProfileCache;
+                                }
+                            } catch (e) {}
+                        }
+                    }
+                } catch (e) {}
+            }
+            
+            return null;
+        }
+
+        // Сохраняем тип чата для создания уникального названия
+        let currentChatType = null;
+        
+        async function handleCardClick(text) {
+            const welcome = document.getElementById('welcome');
+            if (welcome) welcome.style.display = 'none';
+            
+            // Сохраняем тип чата
+            currentChatType = text;
+            
+            // Проверяем есть ли уже профиль
+            const existingProfile = await checkExistingProfile();
+            
+            if (text === 'Развитие карьеры' || text === 'Анализ навыков' || text === 'Анализ целей') {
+                if (existingProfile) {
+                    // Профиль есть - не нужно проходить интервью заново
+                    if (!sessionId) {
+                        typing();
+                        showProgress();
+                        try {
+                            await createSession();
+                        } catch (e) {
+                            untype();
+                            hideProgress();
+                            showToast("⚠️ Не удалось создать сессию", "error");
+                            if (welcome) welcome.style.display = 'flex';
+                            return;
+                        }
+                        untype();
+                        hideProgress();
+                    }
+                    
+                    if (!sessionId) {
+                        typing();
+                        showProgress();
+                        try {
+                            await createSession(text);
+                        } catch (e) {
+                            untype();
+                            hideProgress();
+                            showToast("⚠️ Не удалось создать сессию", "error");
+                            if (welcome) welcome.style.display = 'flex';
+                            return;
+                        }
+                        untype();
+                        hideProgress();
+                    }
+                    
+                    if (text === 'Развитие карьеры') {
+                        await handleCareerPlanWithProfile(existingProfile);
+                    } else if (text === 'Анализ навыков') {
+                        await handleSkillsWithProfile(existingProfile);
+                    } else if (text === 'Анализ целей') {
+                        await handleGoalsWithProfile(existingProfile);
+                    }
+                    return;
+                } else {
+                    // Профиля нет - предлагаем сначала создать профиль
+                    if (!sessionId) {
+                        typing();
+                        showProgress();
+                        try {
+                            await createSession(text);
+                        } catch (e) {
+                            untype();
+                            hideProgress();
+                            showToast("⚠️ Не удалось создать сессию", "error");
+                            if (welcome) welcome.style.display = 'flex';
+                            return;
+                        }
+                        untype();
+                        hideProgress();
+                    }
+                    add('assistant', `📋 Для использования функции "${text}" сначала нужно создать профиль в разделе "Хочу найти работу в финансах".\n\nПосле создания профиля вы сможете использовать все функции коуча.`);
+                    actions();
+                    return;
+                }
+            }
+            
+            // Основная карточка "Хочу найти работу в финансах" - создаём сессию и проходим интервью
+            if (!sessionId) {
+                try {
+                    typing();
+                    showProgress();
+                    await createSession();
+                    untype();
+                    hideProgress();
+                } catch (e) {
+                    untype();
+                    hideProgress();
+                    showToast("⚠️ Не удалось создать сессию", "error");
+                    if (welcome) welcome.style.display = 'flex';
+                }
+            }
+        }
+
+        async function handleCareerPlanWithProfile(profile) {
+            const currentPosition = profile.professional_context?.professional_role || 'Финансовый специалист';
+            add('assistant', `🎯 Отлично! Я вижу из вашего профиля, что вы работаете как **${currentPosition}**.\n\nЧтобы составить план развития карьеры, укажите:\n\n1. **Кем хотите стать?** (например: CFO, Директор по инвестициям)\n2. **В какой сфере?** (банки, инвестиции, финтех)\n3. **Какой уровень?** (senior, lead, director)\n\nНапишите ваши цели в чат, и я составлю персональный план развития с курсами и вакансиями.`);
+            actions();
+        }
+
+        async function handleSkillsWithProfile(profile) {
+            const currentPosition = profile.professional_context?.professional_role || 'Финансовый специалист';
+            const currentSkills = profile.skills?.hard_skills || [];
+            const currentTools = profile.skills?.tools || [];
+            
+            let skillsHtml = `<div class="profile-card">`;
+            skillsHtml += `<div class="profile-section-title">📊 Анализ навыков</div>`;
+            skillsHtml += `<div class="profile-section">`;
+            skillsHtml += `<div class="profile-section-title">👤 Ваш текущий профиль</div>`;
+            skillsHtml += `<div class="profile-item"><strong>Позиция:</strong> ${currentPosition}</div>`;
+            
+            if (currentSkills.length > 0) {
+                skillsHtml += `<div class="profile-item"><strong>Ваши навыки:</strong></div>`;
+                skillsHtml += `<div style="margin-top: 8px;">`;
+                currentSkills.forEach(s => skillsHtml += `<span class="profile-tag">${s}</span>`);
+                skillsHtml += `</div>`;
+            }
+            
+            if (currentTools.length > 0) {
+                skillsHtml += `<div class="profile-item" style="margin-top: 12px;"><strong>Инструменты:</strong> ${currentTools.join(', ')}</div>`;
+            }
+            
+            skillsHtml += `</div>`;
+            skillsHtml += `<div class="profile-section">`;
+            skillsHtml += `<div class="profile-section-title">🎯 Анализ соответствия навыков</div>`;
+            skillsHtml += `<div class="profile-item">Укажите целевую позицию, и я проанализирую:</div>`;
+            skillsHtml += `<div class="profile-item">✓ Какие навыки у вас уже есть</div>`;
+            skillsHtml += `<div class="profile-item">✓ Какие навыки нужно развить</div>`;
+            skillsHtml += `<div class="profile-item">✓ Приоритетность развития навыков</div>`;
+            skillsHtml += `<div class="profile-item">✓ Рекомендации по обучению</div>`;
+            skillsHtml += `</div>`;
+            skillsHtml += `</div>`;
+            
+            addHTML('assistant', skillsHtml);
+            add('assistant', '\n**Для какой позиции вы хотите узнать необходимые навыки?**\n\nНапример: CFO, Финансовый директор, Директор по инвестициям, Риск-менеджер, Финансовый аналитик');
+            actions();
+        }
+
+        async function handleGoalsWithProfile(profile) {
+            const currentPosition = profile.professional_context?.professional_role || 'Финансовый специалист';
+            const currentField = profile.professional_context?.professional_field || 'не указана';
+            const goals = profile.goals || {};
+            
+            let goalsHtml = `<div class="profile-card">`;
+            goalsHtml += `<div class="profile-section-title">🎯 Анализ карьерных целей</div>`;
+            goalsHtml += `<div class="profile-section">`;
+            goalsHtml += `<div class="profile-section-title">📍 Текущая позиция</div>`;
+            goalsHtml += `<div class="profile-item"><strong>Роль:</strong> ${currentPosition}</div>`;
+            goalsHtml += `<div class="profile-item"><strong>Сфера:</strong> ${currentField}</div>`;
+            if (profile.professional_context?.seniority_level) {
+                goalsHtml += `<div class="profile-item"><strong>Уровень:</strong> ${profile.professional_context.seniority_level}</div>`;
+            }
+            goalsHtml += `</div>`;
+            
+            if (goals.desired_role || goals.target_field) {
+                goalsHtml += `<div class="profile-section">`;
+                goalsHtml += `<div class="profile-section-title">🎯 Уже указанные цели</div>`;
+                if (goals.desired_role) goalsHtml += `<div class="profile-item"><strong>Целевая позиция:</strong> ${goals.desired_role}</div>`;
+                if (goals.target_field) goalsHtml += `<div class="profile-item"><strong>Целевая сфера:</strong> ${goals.target_field}</div>`;
+                if (goals.desired_level) goalsHtml += `<div class="profile-item"><strong>Целевой уровень:</strong> ${goals.desired_level}</div>`;
+                goalsHtml += `</div>`;
+            }
+            
+            goalsHtml += `<div class="profile-section">`;
+            goalsHtml += `<div class="profile-section-title">🔍 Глубокий анализ целей</div>`;
+            goalsHtml += `<div class="profile-item">Я проведу комплексный анализ ваших карьерных целей:</div>`;
+            goalsHtml += `<div class="profile-item">✓ SWOT-анализ (сильные/слабые стороны, возможности/риски)</div>`;
+            goalsHtml += `<div class="profile-item">✓ Реалистичность целей</div>`;
+            goalsHtml += `<div class="profile-item">✓ Пошаговый план достижения</div>`;
+            goalsHtml += `<div class="profile-item">✓ Альтернативные пути развития</div>`;
+            goalsHtml += `<div class="profile-item">✓ Временные рамки</div>`;
+            goalsHtml += `</div>`;
+            goalsHtml += `</div>`;
+            
+            addHTML('assistant', goalsHtml);
+            add('assistant', '\n**Опишите ваши карьерные цели подробно:**\n\n1. Куда хотите развиваться?\n2. Какие навыки хотите получить?\n3. В какой сфере видите себя через 3-5 лет?\n4. Какие у вас амбиции и ожидания?');
+            actions();
+        }
+
+        async function load(id) {
+            sessionId = id;
+            localStorage.setItem('sid', id);
+            
+            try {
+                const r = await retry(`${API}/sessions/${id}`, {}, 3);
+                if (!r.ok) { 
+                    if (r.status === 404) {
+                        localStorage.removeItem('sid');
+                        sessionId = null;
+                    }
+                    return; 
+                }
+                const d = await r.json();
+                const msgs = d.messages || [];
+                
+                const chat = document.getElementById('chat');
+                if (!chat) return;
+                
+                chat.innerHTML = '';
+                
+                if (msgs.length) {
+                    const welcome = document.getElementById('welcome');
+                    if (welcome) welcome.style.display = 'none';
+                    
+                    msgs.sort((a, b) => new Date(a.created_at || 0) - new Date(b.created_at || 0));
+                    msgs.forEach(m => {
+                        const role = m.role === 'user' ? 'user' : 'assistant';
+                        add(role, m.content, false);
+                    });
+                    scrollToBottom();
+                    
+                    const lastMsg = msgs[msgs.length - 1];
+                    if (lastMsg && lastMsg.done && !chat.querySelector('.action-buttons')) {
+                        actions();
+                    }
+                } else {
+                    chat.innerHTML = getWelcomeHTML();
+                }
+                
+                await loadHistory(); // Обновляем подсветку активного чата
+            } catch (e) {
+                console.error('Load failed:', e);
+            }
+        }
+
+        async function sendMsg() {
+            const inp = document.getElementById('input');
+            if (!inp) return;
+            
+            const txt = inp.value.trim();
+            if (!txt || sending) return;
+            if (txt.length > 5000) {
+                showToast("⚠️ Сообщение слишком длинное", "warning");
+                return;
+            }
+
+            inp.value = '';
+            inp.style.height = 'auto';
+            document.getElementById('sendBtn').disabled = true;
+            const welcome = document.getElementById('welcome');
+            if (welcome) welcome.style.display = 'none';
+            
+            add('user', txt);
+            sending = true;
+            typing();
+
+            try {
+                if (!sessionId) await createSession();
+                if (!sessionId) throw new Error("No session");
+
+                // Проверяем контекст - если ждём цели для плана развития
+                const chat = document.getElementById('chat');
+                const lastAiMsg = Array.from(chat?.querySelectorAll('.msg.ai .msg-content') || []).pop();
+                const lastAiText = lastAiMsg?.textContent || '';
+                
+                if (lastAiText.includes('Кем хотите стать') || lastAiText.includes('план развития') || lastAiText.includes('цели в чат')) {
+                    await createCareerPlanFromGoals(txt);
+                    return;
+                }
+                
+                // Проверяем контекст для анализа навыков
+                if (lastAiText.includes('Для какой позиции') || lastAiText.includes('необходимые навыки') || lastAiText.includes('Анализ соответствия навыков')) {
+                    await analyzeSkillsForPosition(txt);
+                    return;
+                }
+                
+                // Проверяем контекст для анализа целей
+                if (lastAiText.includes('карьерные цели') || lastAiText.includes('Глубокий анализ целей') || lastAiText.includes('Опишите ваши карьерные цели')) {
+                    await analyzeCareerGoals(txt);
+                    return;
+                }
+
+                const r = await retry(`${API}/chat/${sessionId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: txt })
+                }, 5);
+
+                if (!r.ok) throw new Error(`Chat failed: ${r.status}`);
+
+                const d = await r.json();
+                untype();
+                add('assistant', d.reply || '');
+                if (d.done) actions();
+
+            } catch (e) {
+                untype();
+                showToast("⚠️ Произошла ошибка. Попробуйте еще раз.", "error");
+                inp.value = txt;
+                document.getElementById('sendBtn').disabled = false;
+            } finally {
+                sending = false;
+            }
+        }
+
+        async function handleProfileAction() {
+            typing();
+            showProgress();
+            try {
+                const r = await retry(`${API}/profile/${sessionId}`, {}, 3);
+                untype();
+                hideProgress();
+                
+                if (!r.ok) {
+                    add('system', "⚠️ Профиль не найден. Пожалуйста, завершите интервью.");
+                    actions();
+                    return;
+                }
+                
+                const data = await r.json();
+                const profile = data.profile;
+                globalProfileCache = profile;
+                
+                let html = '<div class="profile-card">';
+                
+                // Профессиональный контекст
+                if (profile.professional_context) {
+                    const pc = profile.professional_context;
+                    html += '<div class="profile-section">';
+                    html += '<div class="profile-section-title">👤 Профессиональный контекст</div>';
+                    if (pc.professional_role) html += `<div class="profile-item"><strong>Роль:</strong> ${pc.professional_role}</div>`;
+                    if (pc.professional_field) html += `<div class="profile-item"><strong>Сфера:</strong> ${pc.professional_field}</div>`;
+                    if (pc.specialization) html += `<div class="profile-item"><strong>Специализация:</strong> ${pc.specialization}</div>`;
+                    if (pc.seniority_level) html += `<div class="profile-item"><strong>Уровень:</strong> ${pc.seniority_level}</div>`;
+                    html += '</div>';
+                }
+                
+                // Опыт работы
+                if (profile.resume && profile.resume.length > 0) {
+                    html += '<div class="profile-section">';
+                    html += '<div class="profile-section-title">💼 Опыт работы</div>';
+                    profile.resume.forEach(job => {
+                        html += `<div class="profile-item"><strong>${job.title || 'Должность'}</strong> в ${job.company || 'Компания'}`;
+                        if (job.start_date) html += ` (${job.start_date}${job.end_date ? ' — ' + job.end_date : ' — по н.в.'})`;
+                        html += '</div>';
+                        if (job.tasks && job.tasks.length) {
+                            html += `<div class="profile-item" style="font-size:13px;color:var(--text-dim)">Задачи: ${job.tasks.slice(0,3).join(', ')}</div>`;
+                        }
+                        if (job.achievements && job.achievements.length) {
+                            html += `<div class="profile-item" style="font-size:13px;color:var(--success)">✓ ${job.achievements.slice(0,2).join(', ')}</div>`;
+                        }
+                    });
+                    html += '</div>';
+                }
+                
+                // Навыки
+                if (profile.skills) {
+                    const sk = profile.skills;
+                    html += '<div class="profile-section">';
+                    html += '<div class="profile-section-title">🛠️ Навыки и компетенции</div>';
+                    if (sk.hard_skills && sk.hard_skills.length) {
+                        html += '<div style="margin-bottom:8px">';
+                        sk.hard_skills.forEach(s => html += `<span class="profile-tag">${s}</span>`);
+                        html += '</div>';
+                    }
+                    if (sk.tools && sk.tools.length) {
+                        html += `<div class="profile-item"><strong>Инструменты:</strong> ${sk.tools.join(', ')}</div>`;
+                    }
+                    if (sk.certifications && sk.certifications.length) {
+                        html += `<div class="profile-item"><strong>Сертификаты:</strong> ${sk.certifications.join(', ')}</div>`;
+                    }
+                    if (sk.education && sk.education.length) {
+                        html += `<div class="profile-item"><strong>Образование:</strong> ${sk.education.join(', ')}</div>`;
+                    }
+                    html += '</div>';
+                }
+                
+                // Цели
+                if (profile.goals) {
+                    const g = profile.goals;
+                    html += '<div class="profile-section">';
+                    html += '<div class="profile-section-title">🎯 Карьерные цели</div>';
+                    if (g.desired_role) html += `<div class="profile-item"><strong>Целевая позиция:</strong> ${g.desired_role}</div>`;
+                    if (g.target_field) html += `<div class="profile-item"><strong>Целевая сфера:</strong> ${g.target_field}</div>`;
+                    if (g.desired_level) html += `<div class="profile-item"><strong>Целевой уровень:</strong> ${g.desired_level}</div>`;
+                    if (g.salary_expectation && g.salary_expectation.min) {
+                        const sal = g.salary_expectation;
+                        html += `<div class="profile-item"><strong>Зарплатные ожидания:</strong> ${sal.min?.toLocaleString()}${sal.max ? ' — ' + sal.max.toLocaleString() : '+'} ${sal.currency || 'RUR'}</div>`;
+                    }
+                    html += '</div>';
+                }
+                
+                // Достижения
+                if (profile.achievements && profile.achievements.length) {
+                    html += '<div class="profile-section">';
+                    html += '<div class="profile-section-title">🏆 Ключевые достижения</div>';
+                    profile.achievements.forEach(a => html += `<div class="profile-item">✓ ${a}</div>`);
+                    html += '</div>';
+                }
+                
+                html += '</div>';
+                
+                addHTML('assistant', html, false);
+                // Небольшая задержка перед показом кнопок для лучшего UX
+                setTimeout(() => {
+                    actions();
+                }, 100);
+            } catch (e) {
+                untype();
+                hideProgress();
+                add('system', "⚠️ Не удалось получить профиль");
+                actions();
+            }
+        }
+
+        async function handleVacanciesAction() {
+            typing();
+            showProgress();
+            try {
+                const r = await retry(`${API}/match/vacancies/by-session/${sessionId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ k_faiss: 100, k_stage1: 30, k_stage2: 15 })
+                }, 3);
+                untype();
+                hideProgress();
+                
+                if (!r.ok) {
+                    add('system', "⚠️ Профиль не найден. Пожалуйста, завершите интервью.");
+                    actions();
+                    return;
+                }
+                
+                const data = await r.json();
+                const vacancies = data.result || [];
+                
+                if (vacancies.length === 0) {
+                    add('assistant', "🔍 Подходящих вакансий не найдено. Попробуйте изменить параметры профиля.");
+                    actions();
+                    return;
+                }
+                
+                // Функция определения уровня вакансии (1-5)
+                function getVacancyLevel(vac) {
+                    const title = (vac.title || '').toLowerCase();
+                    const exp = (vac.experience || '').toLowerCase();
+                    const desc = (vac.description || '').toLowerCase();
+                    
+                    // Уровень 1: Стажер, Intern, без опыта
+                    if (title.includes('стажер') || title.includes('intern') || title.includes('trainee') || 
+                        exp.includes('без опыта') || exp.includes('нет опыта')) {
+                        return { level: 1, label: 'Начальный', color: '#22c55e' };
+                    }
+                    
+                    // Уровень 2: Junior, до 1 года опыта
+                    if (title.includes('junior') || title.includes('младший') || 
+                        exp.includes('до 1 года') || exp.includes('1 год')) {
+                        return { level: 2, label: 'Младший', color: '#10a37f' };
+                    }
+                    
+                    // Уровень 3: Middle, 1-3 года опыта
+                    if (title.includes('middle') || title.includes('средний') || 
+                        exp.includes('от 1 года') || exp.includes('1-3 года') || exp.includes('до 3 лет')) {
+                        return { level: 3, label: 'Средний', color: '#fbbf24' };
+                    }
+                    
+                    // Уровень 4: Senior, Lead, 3-6 лет опыта
+                    if (title.includes('senior') || title.includes('lead') || title.includes('старший') || title.includes('ведущий') ||
+                        exp.includes('от 3 лет') || exp.includes('3-6 лет') || exp.includes('более 3 лет')) {
+                        return { level: 4, label: 'Старший', color: '#f97316' };
+                    }
+                    
+                    // Уровень 5: Director, Head, CFO, более 6 лет
+                    if (title.includes('director') || title.includes('head') || title.includes('директор') || title.includes('руководитель') ||
+                        title.includes('cfo') || title.includes('ceo') || exp.includes('более 6 лет') || exp.includes('от 6 лет')) {
+                        return { level: 5, label: 'Экспертный', color: '#ef4444' };
+                    }
+                    
+                    // По умолчанию средний уровень
+                    return { level: 3, label: 'Средний', color: '#fbbf24' };
+                }
+                
+                let html = `<div><strong>🔍 Найдено ${vacancies.length} подходящих вакансий:</strong></div><br>`;
+                
+                vacancies.slice(0, 15).forEach((vac, idx) => {
+                    const levelInfo = getVacancyLevel(vac);
+                    const descPreview = vac.description ? 
+                        (vac.description.length > 200 ? vac.description.substring(0, 200) + '...' : vac.description) : '';
+                    
+                    html += `<div class="vacancy-card">`;
+                    html += `<div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">`;
+                    html += `<div class="vacancy-title" style="flex: 1;">${idx + 1}. ${vac.title || 'Вакансия'}</div>`;
+                    html += `<span class="vacancy-level-badge" style="background: ${levelInfo.color}; color: white; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; white-space: nowrap; margin-left: 12px;">${levelInfo.level}/5 ${levelInfo.label}</span>`;
+                    html += `</div>`;
+                    if (vac.company) html += `<div class="vacancy-info">🏢 ${vac.company}</div>`;
+                    if (vac.location) html += `<div class="vacancy-info">📍 ${vac.location}</div>`;
+                    if (vac.salary) html += `<div class="vacancy-info">💰 ${vac.salary}</div>`;
+                    if (vac.experience) html += `<div class="vacancy-info">⏳ ${vac.experience}</div>`;
+                    if (descPreview) {
+                        html += `<div class="vacancy-description" style="margin-top: 10px; padding: 10px; background: rgba(255,255,255,0.03); border-radius: 8px; font-size: 13px; color: var(--text-dim); line-height: 1.5;">${descPreview}</div>`;
+                    }
+                    if (vac.key_skills) {
+                        const skills = vac.key_skills.split(',').slice(0, 5).join(', ');
+                        html += `<div class="vacancy-info" style="margin-top: 8px;"><strong>Навыки:</strong> ${skills}</div>`;
+                    }
+                    if (vac.hh_url) {
+                        html += `<a href="${vac.hh_url}" target="_blank" rel="noopener" class="vacancy-link">🔗 Открыть на hh.ru</a>`;
+                    }
+                    html += `</div>`;
+                });
+                
+                addHTML('assistant', html, false);
+                scrollToFirstVacancy();
+                setTimeout(() => {
+                    actions();
+                }, 200);
+            } catch (e) {
+                untype();
+                hideProgress();
+                add('system', "⚠️ Не удалось найти вакансии");
+                actions();
+            }
+        }
+        
+        function scrollToFirstVacancy() {
+            setTimeout(() => {
+                const chat = document.getElementById('chat');
+                const firstVacancy = document.querySelector('.vacancy-card');
+                if (firstVacancy && chat) {
+                    // Скроллим к первой вакансии, но с небольшим отступом сверху
+                    const rect = firstVacancy.getBoundingClientRect();
+                    const chatRect = chat.getBoundingClientRect();
+                    const scrollTop = chat.scrollTop + rect.top - chatRect.top - 20;
+                    chat.scrollTo({ top: scrollTop, behavior: 'smooth' });
+                } else {
+                    // Если вакансии не найдены, скроллим в начало списка
+                    if (chat) chat.scrollTop = 0;
+                }
+            }, 200);
+        }
+
+        async function handleCareerPlanAction() {
+            const profile = await checkExistingProfile();
+            
+            if (profile) {
+                await handleCareerPlanWithProfile(profile);
+            } else {
+                add('assistant', "🎯 Чтобы составить план развития карьеры, сначала нужно пройти интервью и создать профиль.\n\nНажмите кнопку **Профиль** или начните новый чат.");
+                actions();
+            }
+        }
+
+        async function analyzeSkillsForPosition(position) {
+            typing();
+            showProgress();
+            
+            try {
+                const profile = await checkExistingProfile();
+                if (!profile) {
+                    untype();
+                    hideProgress();
+                    add('system', "⚠️ Профиль не найден");
+                    actions();
+                    return;
+                }
+                
+                // Формируем детальный промпт для анализа навыков
+                const currentRole = profile.professional_context?.professional_role || 'Финансовый специалист';
+                const currentSkills = profile.skills?.hard_skills || [];
+                const currentTools = profile.skills?.tools || [];
+                
+                const analysisPrompt = `Ты профессиональный карьерный консультант для финансового сектора. Проведи МАКСИМАЛЬНО ДЕТАЛЬНЫЙ и ПОЛЕЗНЫЙ анализ соответствия навыков пользователя целевой позиции.
+
+ТЕКУЩИЙ ПРОФИЛЬ:
+- Позиция: ${currentRole}
+- Навыки: ${currentSkills.join(', ') || 'не указаны'}
+- Инструменты: ${currentTools.join(', ') || 'не указаны'}
+
+ЦЕЛЕВАЯ ПОЗИЦИЯ: "${position}"
+
+КРИТИЧЕСКИ ВАЖНО: Ты ДОЛЖЕН дать ДЕТАЛЬНЫЙ анализ. НЕ говори просто "спасибо" или общие фразы. Дай КОНКРЕТНЫЕ и ПОЛЕЗНЫЕ рекомендации.
+
+ЗАДАЧА: Проведи детальный анализ и дай КОНКРЕТНЫЕ рекомендации:
+
+1. НАВЫКИ, КОТОРЫЕ У ВАС УЖЕ ЕСТЬ (минимум 5-7, конкретно):
+   - Перечисли ВСЕ навыки из вашего профиля, которые подходят для целевой позиции "${position}"
+   - Для каждого навыка укажите:
+     * Уровень владения (начальный/средний/продвинутый)
+     * Как этот навык поможет в целевой позиции
+     * Что можно улучшить в этом навыке
+
+2. НАВЫКИ, КОТОРЫЕ НУЖНО РАЗВИТЬ (минимум 7-10, конкретно):
+   - Перечисли ВСЕ навыки, необходимые для позиции "${position}", но отсутствующие в вашем профиле
+   - Для каждого навыка укажите:
+     * Приоритетность развития (высокий/средний/низкий) и почему
+     * Почему этот навык критически важен для "${position}"
+     * Какой уровень нужно достичь (начальный/средний/продвинутый)
+
+3. ДЕТАЛЬНЫЙ ПЛАН РАЗВИТИЯ НАВЫКОВ (для каждого приоритетного навыка):
+   - Конкретные курсы или программы обучения (название, провайдер, длительность)
+   - Практические проекты для отработки (описание проекта, что нужно сделать, какие результаты получить)
+   - Временные рамки для освоения (например: "2-3 месяца интенсивного обучения")
+   - Метрики успеха (как понять, что навык освоен)
+
+4. КОНКРЕТНЫЕ РЕКОМЕНДАЦИИ ПО ОБУЧЕНИЮ:
+   - Топ-7 курсов с конкретными названиями, провайдерами и ссылками для поиска
+   - Топ-5 практических проектов для портфолио (детальное описание каждого)
+   - Сертификаты, которые стоит получить (CFA, FRM, ACCA и т.д.) и почему
+   - Дополнительные ресурсы (книги, вебинары, сообщества)
+
+5. ПРИОРИТИЗАЦИЯ РАЗВИТИЯ:
+   - Какие навыки развивать в первую очередь (первые 3 месяца)
+   - Какие навыки развивать во вторую очередь (3-6 месяцев)
+   - Какие навыки развивать в третью очередь (6-12 месяцев)
+
+ВАЖНО: 
+- Ответ должен быть МАКСИМАЛЬНО ДЕТАЛЬНЫМ, структурированным и практичным
+- Используй маркированные списки, конкретные примеры и метрики
+- НЕ заканчивай ответ просто "спасибо" - дай реальные рекомендации
+- Каждый раздел должен содержать минимум 5-7 конкретных пунктов`;
+                
+                const r = await retry(`${API}/chat/${sessionId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: analysisPrompt })
+                }, 3);
+                
+                untype();
+                hideProgress();
+                
+                if (!r.ok) throw new Error(`Analysis failed: ${r.status}`);
+                
+                const d = await r.json();
+                const analysisResult = d.reply || '';
+                
+                // Форматируем результат в красивую карточку
+                let html = `<div class="profile-card">`;
+                html += `<div class="profile-section-title">📊 Детальный анализ навыков для позиции: ${position}</div>`;
+                html += `<div class="profile-section">`;
+                html += `<div class="profile-item" style="white-space: pre-wrap; line-height: 1.8;">${analysisResult.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</div>`;
+                html += `</div></div>`;
+                
+                addHTML('assistant', html);
+                actions();
+            } catch (e) {
+                untype();
+                hideProgress();
+                add('system', "⚠️ Не удалось проанализировать навыки");
+                actions();
+            }
+        }
+        
+        async function analyzeCareerGoals(goalsText) {
+            typing();
+            showProgress();
+            
+            try {
+                const profile = await checkExistingProfile();
+                if (!profile) {
+                    untype();
+                    hideProgress();
+                    add('system', "⚠️ Профиль не найден. Сначала создайте профиль в разделе 'Хочу найти работу в финансах'.");
+                    actions();
+                    return;
+                }
+                
+                // Формируем детальный промпт для анализа целей
+                const currentRole = profile.professional_context?.professional_role || 'Финансовый специалист';
+                const currentField = profile.professional_context?.professional_field || 'не указана';
+                const currentSkills = profile.skills?.hard_skills?.join(', ') || 'не указаны';
+                
+                const analysisPrompt = `Ты профессиональный карьерный консультант для финансового сектора. Проведи МАКСИМАЛЬНО ГЛУБОКИЙ и ДЕТАЛЬНЫЙ анализ карьерных целей пользователя.
+
+ТЕКУЩИЙ ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ:
+- Текущая позиция: ${currentRole}
+- Сфера: ${currentField}
+- Навыки: ${currentSkills.join(', ') || 'не указаны'}
+
+КАРЬЕРНЫЕ ЦЕЛИ ПОЛЬЗОВАТЕЛЯ:
+"${goalsText}"
+
+КРИТИЧЕСКИ ВАЖНО: Ты ДОЛЖЕН дать МАКСИМАЛЬНО ДЕТАЛЬНЫЙ анализ. НЕ говори просто "спасибо" или общие фразы. Дай КОНКРЕТНЫЕ и ПОЛЕЗНЫЕ рекомендации, которые пользователь сможет реально использовать.
+
+ЗАДАЧА: Проведи комплексный анализ и дай МАКСИМАЛЬНО ДЕТАЛЬНЫЕ рекомендации:
+
+1. SWOT-АНАЛИЗ (детально, минимум по 5 пунктов в каждом разделе):
+   - СИЛЬНЫЕ СТОРОНЫ (минимум 5-7 конкретных пунктов):
+     * Перечисли все сильные стороны из профиля, которые помогут достичь целей
+     * Для каждой сильной стороны объясни, как она поможет
+   
+   - СЛАБЫЕ СТОРОНЫ (минимум 5-7 конкретных пунктов):
+     * Перечисли все слабые стороны, которые могут помешать достижению целей
+     * Для каждой слабой стороны предложи конкретные способы улучшения
+   
+   - ВОЗМОЖНОСТИ ДЛЯ РАЗВИТИЯ (минимум 5-7 конкретных пунктов):
+     * Перечисли все возможности (рыночные тренды, растущие направления, новые технологии)
+     * Для каждой возможности объясни, как её использовать
+   
+   - РИСКИ И ПРЕПЯТСТВИЯ (минимум 5-7 конкретных пунктов):
+     * Перечисли все риски и препятствия на пути к целям
+     * Для каждого риска предложи конкретные способы минимизации
+
+2. ОЦЕНКА РЕАЛИСТИЧНОСТИ ЦЕЛЕЙ (детально):
+   - Насколько реалистичны цели (оценка 1-10 с обоснованием)
+   - Что может помочь достичь целей (конкретные факторы, минимум 5-7)
+   - Что может помешать (конкретные препятствия, минимум 5-7)
+   - Вероятность достижения целей через 1 год / 3 года / 5 лет
+
+3. ПОШАГОВЫЙ ПЛАН ДОСТИЖЕНИЯ (детально, минимум 8-10 шагов):
+   Для каждого шага укажи:
+   - Конкретное действие (что именно делать)
+   - Временные рамки (когда выполнить)
+   - Приоритетность (высокий/средний/низкий)
+   - Необходимые ресурсы (время, деньги, курсы, проекты)
+   - Метрики успеха (как понять, что шаг выполнен)
+   - Зависимости (от каких предыдущих шагов зависит)
+
+4. АЛЬТЕРНАТИВНЫЕ ПУТИ РАЗВИТИЯ (детально, минимум 3-4 варианта):
+   Для каждого пути укажи:
+   - Описание пути (детальное)
+   - Плюсы (минимум 3-5)
+   - Минусы (минимум 3-5)
+   - Временные рамки достижения
+   - Необходимые шаги (минимум 5-7)
+   - Рекомендация (какой путь лучше и почему)
+
+5. КОНКРЕТНЫЕ РЕКОМЕНДАЦИИ (максимально детально):
+   - НАВЫКИ ДЛЯ РАЗВИТИЯ (топ-10 с приоритетами):
+     * Какие навыки развить в первую очередь (первые 3 месяца)
+     * Какие навыки развить во вторую очередь (3-6 месяцев)
+     * Конкретные курсы для каждого навыка
+   
+   - КУРСЫ И СЕРТИФИКАТЫ (топ-10):
+     * Конкретные названия курсов с провайдерами
+     * Сертификаты (CFA, FRM, ACCA и т.д.) с объяснением важности
+     * Порядок прохождения
+   
+   - ВАКАНСИИ НА ПУТИ К ЦЕЛИ (топ-5 промежуточных позиций):
+     * Какие вакансии рассмотреть на пути к цели
+     * Почему каждая вакансия важна
+     * Когда стоит переходить на следующую позицию
+   
+   - ПРОЕКТЫ И ЗАДАЧИ ДЛЯ ОПЫТА (топ-7):
+     * Конкретные проекты для портфолио
+     * Задачи, которые стоит взять на текущей работе
+     * Side-проекты для развития навыков
+
+6. ВРЕМЕННАЯ ДОРОЖНАЯ КАРТА:
+   - Что делать в первые 3 месяца (детально)
+   - Что делать в 3-6 месяцев (детально)
+   - Что делать в 6-12 месяцев (детально)
+   - Что делать в 1-3 года (детально)
+   - Что делать в 3-5 лет (детально)
+
+ВАЖНО: 
+- Ответ должен быть МАКСИМАЛЬНО ДЕТАЛЬНЫМ, структурированным и практичным
+- Используй маркированные списки, конкретные примеры и метрики
+- НЕ заканчивай ответ просто "спасибо" - дай реальные рекомендации
+- Каждый раздел должен содержать минимум 5-7 конкретных пунктов
+- Пользователь должен получить готовый план действий, который можно использовать`;
+                
+                const r = await retry(`${API}/chat/${sessionId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: analysisPrompt })
+                }, 3);
+                
+                untype();
+                hideProgress();
+                
+                if (!r.ok) throw new Error(`Analysis failed: ${r.status}`);
+                
+                const d = await r.json();
+                const analysisResult = d.reply || '';
+                
+                // Форматируем результат в красивую карточку
+                let html = `<div class="profile-card">`;
+                html += `<div class="profile-section-title">🎯 Детальный анализ карьерных целей</div>`;
+                html += `<div class="profile-section">`;
+                html += `<div class="profile-item" style="white-space: pre-wrap; line-height: 1.8;">${analysisResult.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</div>`;
+                html += `</div></div>`;
+                
+                addHTML('assistant', html);
+                actions();
+            } catch (e) {
+                untype();
+                hideProgress();
+                add('system', "⚠️ Не удалось проанализировать цели");
+                actions();
+            }
+        }
+        
+        async function createCareerPlanFromGoals(userGoals) {
+            // Убираем предыдущие индикаторы загрузки перед началом новой
+            untype();
+            hideProgress();
+            typing();
+            showProgress();
+            
+            try {
+                // Извлекаем цели
+                let targetPosition = "Финансовый директор";
+                let targetField = "Финансы";
+                const text = userGoals.toLowerCase();
+                
+                if (text.includes('cfo') || text.includes('финансовый директор')) {
+                    targetPosition = "Финансовый директор (CFO)";
+                } else if (text.includes('директор по инвестициям') || text.includes('инвестиционный директор')) {
+                    targetPosition = "Директор по инвестициям";
+                    targetField = "Инвестиции";
+                } else if (text.includes('риск')) {
+                    targetPosition = "Директор по риск-менеджменту";
+                    targetField = "Риск-менеджмент";
+                } else if (text.includes('директор')) {
+                    targetPosition = userGoals.split('\n')[0].trim() || "Финансовый директор";
+                }
+                
+                if (text.includes('банк')) targetField = "Банки";
+                else if (text.includes('инвест')) targetField = "Инвестиции";
+                else if (text.includes('финтех') || text.includes('fintech')) targetField = "Финтех";
+                
+                const planR = await retry(`${API}/match/career-development`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        session_id: sessionId,
+                        target_position: targetPosition,
+                        target_field: targetField
+                    })
+                }, 3);
+                
+                untype();
+                hideProgress();
+                
+                if (!planR.ok) {
+                    add('system', "⚠️ Не удалось создать план. Убедитесь, что профиль создан.");
+                    actions();
+                    return;
+                }
+                
+                const planData = await planR.json();
+                const courses = planData.courses || [];
+                const vacancies = planData.future_vacancies || [];
+                const gapAnalysis = planData.gap_analysis || "";
+                
+                let html = `<div class="profile-card">`;
+                html += `<div class="profile-section-title">🚀 План развития карьеры к позиции: ${targetPosition}</div>`;
+                
+                if (gapAnalysis) {
+                    html += `<div class="profile-section"><div class="profile-section-title">📊 Анализ разрыва в навыках</div>`;
+                    html += `<div class="profile-item">${gapAnalysis}</div></div>`;
+                }
+                
+                if (courses.length > 0) {
+                    html += `<div class="profile-section"><div class="profile-section-title">📚 Рекомендуемые курсы (${courses.length})</div>`;
+                    // Фильтруем курсы с валидными URL и проверяем их более тщательно
+                    const validCourses = courses.filter(course => {
+                        if (!course.url || !course.url.trim()) return false;
+                        // Проверяем, что URL не пустой и не содержит ошибок
+                        try {
+                            const url = new URL(course.url);
+                            // Проверяем, что это валидный HTTP/HTTPS URL с доменом
+                            if (url.protocol !== 'http:' && url.protocol !== 'https:') return false;
+                            if (!url.hostname || url.hostname.length < 3) return false;
+                            // Проверяем, что это не пустая ссылка или ссылка на несуществующую страницу
+                            if (url.pathname === '/' && !url.search) {
+                                // Если это только домен без пути, это нормально для поисковых страниц
+                                return true;
+                            }
+                            return true;
+                        } catch {
+                            return false;
+                        }
+                    });
+                    
+                    if (validCourses.length === 0) {
+                        html += `<div class="profile-item" style="color: var(--text-dim); font-style: italic;">Курсы будут добавлены в ближайшее время</div>`;
+                    } else {
+                        validCourses.slice(0, 7).forEach((course, idx) => {
+                        html += `<div class="course-card">`;
+                        html += `<div class="course-title">${idx + 1}. ${course.name || 'Курс'}</div>`;
+                        if (course.provider) html += `<div class="course-info">🏫 ${course.provider}</div>`;
+                        if (course.skills) html += `<div class="course-info">🛠️ ${course.skills}</div>`;
+                        if (course.level) html += `<div class="course-info">📊 Уровень: ${course.level}</div>`;
+                        if (course.url) html += `<a href="${course.url}" target="_blank" rel="noopener" class="course-link">📖 Перейти к курсу</a>`;
+                        html += `</div>`;
+                    });
+                    }
+                    html += `</div>`;
+                }
+                
+                if (vacancies.length > 0) {
+                    // Функция определения уровня вакансии (1-5)
+                    function getVacancyLevel(vac) {
+                        const title = (vac.title || '').toLowerCase();
+                        const exp = (vac.experience || '').toLowerCase();
+                        
+                        if (title.includes('стажер') || title.includes('intern') || exp.includes('без опыта')) {
+                            return { level: 1, label: 'Начальный', color: '#22c55e' };
+                        }
+                        if (title.includes('junior') || title.includes('младший') || exp.includes('до 1 года')) {
+                            return { level: 2, label: 'Младший', color: '#10a37f' };
+                        }
+                        if (title.includes('middle') || title.includes('средний') || exp.includes('1-3 года')) {
+                            return { level: 3, label: 'Средний', color: '#fbbf24' };
+                        }
+                        if (title.includes('senior') || title.includes('lead') || exp.includes('3-6 лет')) {
+                            return { level: 4, label: 'Старший', color: '#f97316' };
+                        }
+                        if (title.includes('director') || title.includes('директор') || exp.includes('более 6 лет')) {
+                            return { level: 5, label: 'Экспертный', color: '#ef4444' };
+                        }
+                        return { level: 3, label: 'Средний', color: '#fbbf24' };
+                    }
+                    
+                    html += `<div class="profile-section"><div class="profile-section-title">💼 Вакансии на пути к цели (${vacancies.length})</div>`;
+                    vacancies.slice(0, 15).forEach((vac, idx) => {
+                        const levelInfo = getVacancyLevel(vac);
+                        const descPreview = vac.description ? 
+                            (vac.description.length > 200 ? vac.description.substring(0, 200) + '...' : vac.description) : '';
+                        
+                        html += `<div class="vacancy-card">`;
+                        html += `<div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">`;
+                        html += `<div class="vacancy-title" style="flex: 1;">${idx + 1}. ${vac.title || 'Вакансия'}</div>`;
+                        html += `<span class="vacancy-level-badge" style="background: ${levelInfo.color}; color: white; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; white-space: nowrap; margin-left: 12px;">${levelInfo.level}/5 ${levelInfo.label}</span>`;
+                        html += `</div>`;
+                        if (vac.company) html += `<div class="vacancy-info">🏢 ${vac.company}</div>`;
+                        if (vac.location) html += `<div class="vacancy-info">📍 ${vac.location}</div>`;
+                        if (vac.salary) html += `<div class="vacancy-info">💰 ${vac.salary}</div>`;
+                        if (vac.experience) html += `<div class="vacancy-info">⏳ ${vac.experience}</div>`;
+                        if (descPreview) {
+                            html += `<div class="vacancy-description" style="margin-top: 10px; padding: 10px; background: rgba(255,255,255,0.03); border-radius: 8px; font-size: 13px; color: var(--text-dim); line-height: 1.5;">${descPreview}</div>`;
+                        }
+                        if (vac.key_skills) {
+                            const skills = vac.key_skills.split(',').slice(0, 5).join(', ');
+                            html += `<div class="vacancy-info" style="margin-top: 8px;"><strong>Навыки:</strong> ${skills}</div>`;
+                        }
+                        if (vac.hh_url) html += `<a href="${vac.hh_url}" target="_blank" rel="noopener" class="vacancy-link">🔗 Открыть вакансию</a>`;
+                        html += `</div>`;
+                    });
+                    html += `</div>`;
+                }
+                
+                html += `</div>`;
+                
+                addHTML('assistant', html, false);
+                // Скроллим к началу плана развития
+                setTimeout(() => {
+                    const chat = document.getElementById('chat');
+                    const planCard = chat?.querySelector('.profile-card');
+                    if (planCard) {
+                        const rect = planCard.getBoundingClientRect();
+                        const chatRect = chat.getBoundingClientRect();
+                        const scrollTop = chat.scrollTop + rect.top - chatRect.top - 20;
+                        chat.scrollTo({ top: scrollTop, behavior: 'smooth' });
+                    }
+                    actions();
+                }, 300);
+            } catch (e) {
+                untype();
+                hideProgress();
+                add('system', "⚠️ Не удалось создать план развития");
+                actions();
+            }
+        }
+
+        function add(role, txt, scr=true) {
+            const c = document.getElementById('chat');
+            if (!c) return;
+            
+            const m = document.createElement('div');
+            m.className = `msg ${role === 'assistant' ? 'ai' : ''}`;
+            const av = role === 'user' ? '👤' : (role === 'system' ? '⚠️' : '💹');
+            
+            // Форматируем текст с поддержкой markdown ссылок и форматирования
+            let formatted = txt
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+                .replace(/\n/g, '<br>');
+            
+            m.innerHTML = `<div class="avatar ${role}">${av}</div><div class="msg-content">${formatted}</div>`;
+            c.appendChild(m);
+            if (scr) scrollToBottom();
+        }
+        
+        function addHTML(role, html, scr=true) {
+            const c = document.getElementById('chat');
+            if (!c) return;
+            
+            const m = document.createElement('div');
+            m.className = `msg ${role === 'assistant' ? 'ai' : ''}`;
+            const av = role === 'user' ? '👤' : (role === 'system' ? '⚠️' : '💹');
+            
+            m.innerHTML = `<div class="avatar ${role}">${av}</div><div class="msg-content">${html}</div>`;
+            c.appendChild(m);
+            if (scr) scrollToBottom();
+        }
+
+        function typing() {
+            const c = document.getElementById('chat');
+            if (!c) return;
+            
+            const d = document.createElement('div');
+            d.id = 't';
+            d.className = 'msg ai';
+            d.innerHTML = '<div class="avatar ai">💹</div><div class="typing-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
+            c.appendChild(d);
+            scrollToBottom();
+        }
+        function untype() { 
+            const e = document.getElementById('t'); 
+            if (e) e.remove(); 
+        }
+
+        function actions() {
+            const c = document.getElementById('chat');
+            if (!c || c.querySelector('.action-buttons')) return;
+            
+            const d = document.createElement('div');
+            d.className = 'msg ai';
+            d.innerHTML = `<div class="avatar ai">💹</div><div class="msg-content"><strong>Что вы хотите сделать дальше?</strong><div class="action-buttons"><button class="btn" onclick="handleProfileAction()">📋 Профиль</button><button class="btn" onclick="handleVacanciesAction()">🔍 Вакансии</button><button class="btn" onclick="handleCareerPlanAction()">🚀 План развития</button></div></div>`;
+            c.appendChild(d);
+            scrollToBottom();
+        }
+
+        // Init
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            setTimeout(init, 100);
+        }
+    </script>
+    <footer style="position: fixed; bottom: 20px; left: 20px; color: var(--primary-light); font-size: 14px; font-weight: 500; z-index: 1000; opacity: 0.9; pointer-events: none; text-shadow: 0 2px 4px rgba(0,0,0,0.3); letter-spacing: 0.3px;">
+        <span style="background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">✦</span> Made by Anton Orlov
+    </footer>
+</body>
+</html>
